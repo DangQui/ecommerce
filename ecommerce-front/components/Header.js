@@ -29,7 +29,7 @@ export default function Header() {
         <StyledHeader>
             <Center>
                 <Wrapper>
-                    <Logo href={'/'}>Thương mại điện tử</Logo>
+                    <Logo href={'/'}>QuisK Shop</Logo>
                     <StyledNav>
                         <NavLink href={'/'}>Trang chủ</NavLink>
                         <NavLink href={'/products'}>Sản phẩm</NavLink>
