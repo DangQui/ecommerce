@@ -2,6 +2,8 @@ import styled from "styled-components";
 import Button from "./Button";
 import CartIcon from "./icon/CartIcon";
 import Link from "next/link";
+import { useContext } from "react";
+import { CartContext } from "./CartContext";
 
 const ProductWrapper = styled.div`
     
@@ -28,6 +30,9 @@ const Title = styled(Link)`
     margin: 0;
     color: inherit;
     text-decoration: none;
+    white-space: nowrap;
+    overflow: hidden; /* Ẩn phần văn bản tràn ra ngoài */
+    text-overflow: ellipsis; /* Thêm dấu ba chấm khi văn bản bị cắt */
 `;
 
 const ProductInfoBox = styled.div`
@@ -39,6 +44,7 @@ const PriceRow = styled.div`
     align-items: center;
     justify-content: space-between;
     margin-top: 2px;
+    gap: 5px;
 `;
 
 const Price = styled.div`
@@ -47,7 +53,13 @@ const Price = styled.div`
 `;
 
 export default function ProductBox({_id, title, description, price, images}) {
+    const {addProduct} = useContext(CartContext);
     const url = '/products/' + _id;
+    // Hàm định dạng giá với dấu chấm
+    const formatPrice = (price) => {
+        return price.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    };
+
     return (
         <ProductWrapper>
             <WhiteBox href={{url}}>
@@ -58,11 +70,12 @@ export default function ProductBox({_id, title, description, price, images}) {
             <ProductInfoBox>
                 <Title href={url}>{title}</Title>
                 <PriceRow>
-                    <Price>{price}</Price>
-                    <Button primary outline><CartIcon/></Button>
+                    <Price>{formatPrice(price)}</Price>
+                    <Button onClick={() => addProduct(_id)} primary outline>
+                        <CartIcon/>
+                    </Button>
                 </PriceRow>
             </ProductInfoBox>
         </ProductWrapper>
-        
     );
 }
