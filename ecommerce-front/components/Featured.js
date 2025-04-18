@@ -24,7 +24,7 @@ const ColumnsWrapper = styled.div`
     display: grid;
     grid-template-columns: 1.1fr 0.9fr;
     gap: 40px;
-    img{
+    img {
         max-width: 100%;
     }
 `;
@@ -37,14 +37,30 @@ const ButtonWrapper = styled.div`
     gap: 10px;
     margin-top: 25px;
 `;
+const LoadingMessage = styled.div`
+    text-align: center;
+    font-size: 1.2rem;
+    color: #aaa;
+`;
 
+export default function Featured({ product }) {
+    const { addProduct } = useContext(CartContext);
 
-export default function Featured({product}) {
-
-    const {addProduct} = useContext(CartContext);
-    
     function addFeaturedToCart() {
-        addProduct(product._id);
+        if (product?._id) {
+            addProduct(product._id);
+        }
+    }
+
+    // Hiển thị loading state nếu product là null hoặc undefined
+    if (!product) {
+        return (
+            <Bg>
+                <Center>
+                    <LoadingMessage>Đang tải sản phẩm...</LoadingMessage>
+                </Center>
+            </Bg>
+        );
     }
 
     return (
@@ -54,9 +70,11 @@ export default function Featured({product}) {
                     <Column>
                         <div>
                             <Title>{product.title}</Title>
-                            <Desc>{product.description} </Desc>
+                            <Desc>{product.description}</Desc>
                             <ButtonWrapper>
-                                <ButtonLink href={"/pr/" + product._id} outline = {1} white = {1}>Đọc thêm</ButtonLink>
+                                <ButtonLink href={`/pr/${product._id}`} outline={1} white={1}>
+                                    Đọc thêm
+                                </ButtonLink>
                                 <Button onClick={addFeaturedToCart} white>
                                     <CartIcon />
                                     Thêm vào Giỏ hàng
@@ -65,11 +83,13 @@ export default function Featured({product}) {
                         </div>
                     </Column>
                     <Column>
-                        <img src="https://quisk-next-ecommerce.s3.amazonaws.com/1744792123229.png" alt="" />
+                        <img
+                            src={product.images?.[0] || "https://quisk-next-ecommerce.s3.amazonaws.com/1744792123229.png"}
+                            alt={product.title}
+                        />
                     </Column>
                 </ColumnsWrapper>
             </Center>
-            
         </Bg>
     );
 }

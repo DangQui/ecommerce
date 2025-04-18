@@ -7,6 +7,7 @@ import Table from "@/components/Table";
 import axios from "axios";
 import { useContext, useEffect, useState } from "react";
 import styled from "styled-components";
+import { useRouter } from "next/router";
 
 const ColumnsWrapper = styled.div`
     display: grid;
@@ -50,7 +51,8 @@ const CityHolder = styled.div`
 `;
 
 export default function CartPage() {
-    const { cartProducts, addProduct, removeProduct } = useContext(CartContext);
+    const router = useRouter();
+    const { cartProducts, addProduct, removeProduct, clearCart } = useContext(CartContext);
     const [products, setProducts] = useState([]);
     const [name, setName] = useState('');
     const [email, setEmail] = useState('');
@@ -58,6 +60,14 @@ export default function CartPage() {
     const [postalCode, setPostalCode] = useState('');
     const [phoneNumber, setPhoneNumber] = useState('');
     const [streetAddres, setStreetAddres] = useState('');
+    const [isSuccess, setIsSuccess] = useState(false);
+
+    useEffect(() => {
+        if (typeof window !== "undefined" && window.location.href.includes("success")) {
+            setIsSuccess(true);
+            clearCart(); // Xóa giỏ hàng khi thanh toán thành công
+        }
+    }, [clearCart]);
 
     useEffect(() => {
         if (cartProducts?.length > 0) {
@@ -75,9 +85,11 @@ export default function CartPage() {
     function moreOfThisProduct(id) {
         addProduct(id);
     }
+
     function lessOfThisProduct(id) {
         removeProduct(id);
     }
+
     async function goToPayment() {
         const response = await axios.post('/api/checkout', {
             name, email, city, postalCode, phoneNumber, streetAddres, cartProducts,
@@ -88,13 +100,12 @@ export default function CartPage() {
     }
 
     let total = 0;
-
     for (const productId of cartProducts) {
         const price = products.find(p => p._id === productId)?.price || 0;
         total += price;
     }
 
-    if (window.location.href.includes('success')){
+    if (isSuccess) {
         return (
             <>
                 <Header />
@@ -140,11 +151,11 @@ export default function CartPage() {
                                                 {product.title}
                                             </ProductInfoCell>
                                             <td>
-                                                <Button onClick ={() => lessOfThisProduct(product._id)}>-</Button>
+                                                <Button onClick={() => lessOfThisProduct(product._id)}>-</Button>
                                                 <QuantityLabel>
-                                                    {cartProducts.filter(id => id === product._id).length}  
+                                                    {cartProducts.filter(id => id === product._id).length}
                                                 </QuantityLabel>
-                                                <Button onClick = {() => moreOfThisProduct(product._id)}>
+                                                <Button onClick={() => moreOfThisProduct(product._id)}>
                                                     +
                                                 </Button>
                                             </td>
@@ -166,50 +177,59 @@ export default function CartPage() {
                     {!!cartProducts?.length && (
                         <Box>
                             <h2>Thông tin đơn hàng</h2>
-                            <Input type="text" 
-                                        placeholder="Họ tên"
-                                        value={name}
-                                        name="name" 
-                                        onChange={ev => setName(ev.target.value)} 
+                            <Input
+                                type="text"
+                                placeholder="Họ tên"
+                                value={name}
+                                name="name"
+                                onChange={ev => setName(ev.target.value)}
+                            />
+                            <Input
+                                type="text"
+                                placeholder="example@gmail.com"
+                                value={email}
+                                name="email"
+                                onChange={ev => setEmail(ev.target.value)}
+                            />
+                            <CityHolder>
+                                <Input
+                                    type="text"
+                                    placeholder="Thành phố"
+                                    value={city}
+                                    name="city"
+                                    onChange={ev => setCity(ev.target.value)}
                                 />
-                                <Input type="text" 
-                                        placeholder="example@gmail.com" 
-                                        value={email}
-                                        name="email" 
-                                        onChange={ev => setEmail(ev.target.value)} 
+                                <Input
+                                    type="text"
+                                    placeholder="Mã bưu chính"
+                                    value={postalCode}
+                                    name="postalCode"
+                                    onChange={ev => setPostalCode(ev.target.value)}
                                 />
-                                <CityHolder>
-                                    <Input type="text" 
-                                            placeholder="Thành phố" 
-                                            value={city}
-                                            name="city" 
-                                            onChange={ev => setCity(ev.target.value)}  
-                                    />
-                                    <Input type="text" 
-                                            placeholder="Mã bưu chính" 
-                                            value={postalCode}
-                                            name="postalCode" 
-                                            onChange={ev => setPostalCode(ev.target.value)}
-                                    />
-                                </CityHolder>
-                                <Input type="text" 
-                                        placeholder="Số điện thoại" 
-                                        value={phoneNumber}
-                                        name="phoneNumber" 
-                                        onChange={ev => setPhoneNumber(ev.target.value)} 
-                                />
-                                <Input type="text" 
-                                        placeholder="Địa chỉ cụ thể" 
-                                        value={streetAddres}
-                                        name="streetAddres" 
-                                        onChange={ev => setStreetAddres(ev.target.value)} 
-                                />
-                                <Button 
-                                    onClick={goToPayment} 
-                                    size={'l'} black block 
-                                    type="submit">
-                                    Thanh toán ngay
-                                </Button>
+                            </CityHolder>
+                            <Input
+                                type="text"
+                                placeholder="Số điện thoại"
+                                value={phoneNumber}
+                                name="phoneNumber"
+                                onChange={ev => setPhoneNumber(ev.target.value)}
+                            />
+                            <Input
+                                type="text"
+                                placeholder="Địa chỉ cụ thể"
+                                value={streetAddres}
+                                name="streetAddres"
+                                onChange={ev => setStreetAddres(ev.target.value)}
+                            />
+                            <Button
+                                onClick={goToPayment}
+                                size={'l'}
+                                black
+                                block
+                                type="submit"
+                            >
+                                Thanh toán ngay
+                            </Button>
                         </Box>
                     )}
                 </ColumnsWrapper>
