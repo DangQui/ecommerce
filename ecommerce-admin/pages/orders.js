@@ -11,6 +11,7 @@ export default function OrdersPage() {
             setOrders(response.data);
         });
     }, []);
+
     return (
         <Layout>
             <h1>Đơn Hàng Đặt</h1>
@@ -18,27 +19,30 @@ export default function OrdersPage() {
                 <thead>
                     <tr>
                         <th>Ngày</th>
+                        <th>Thanh toán</th>
                         <th>Người nhận</th>
                         <th>Sản phẩm</th>
                     </tr>
                 </thead>
                 <tbody>
                     {orders.length > 0 && orders.map(order => (
-                        <tr>
-                            <td>{(new Date(order.createdAt)).toLocaleDateString()}
+                        <tr key={order._id}> {/* Thêm key để tránh warning của React */}
+                            <td>{(new Date(order.createdAt)).toLocaleDateString()}</td>
+                            <td className={order.paid ? 'text-green-600' : 'text-red-600'}>
+                                {order.paid ? 'Đã thanh toán' : 'Chưa thanh toán'}
                             </td>
                             <td>
                                 {order.name} {order.email} <br />   
                                 {order.city} {order.postalCode} <br/>
                                 {order.phoneNumber} <br/>
-                                {order.steetAddres} 
+                                {order.streetAddress} 
                             </td>
                             <td>
-                                {order.line_items.map(l => (
-                                    <>
+                                {order.line_items.map((l, index) => (
+                                    <span key={index}> {/* Thêm key cho map */}
                                         {l.price_data?.product_data?.name} x 
                                         {l.quantity} <br/>
-                                    </>
+                                    </span>
                                 ))}
                             </td>
                         </tr>
@@ -47,5 +51,4 @@ export default function OrdersPage() {
             </table>
         </Layout>
     );
-
 }
