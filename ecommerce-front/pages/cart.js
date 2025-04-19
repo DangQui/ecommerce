@@ -167,7 +167,7 @@ export default function CartPage() {
                                     <tr>
                                         <td></td>
                                         <td></td>
-                                        <td>{total.toLocaleString('vi-VN')}</td>
+                                        <td className="display: flex">{total.toLocaleString('vi-VN')} VND</td>
                                     </tr>
                                 </tbody>
                             </Table>
