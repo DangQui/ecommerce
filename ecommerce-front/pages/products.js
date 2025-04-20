@@ -4,7 +4,11 @@ import ProductsGrid from "@/components/ProductsGrid";
 import Title from "@/components/Title";
 import { mongooseConnect } from "@/lib/mongoose";
 import { Product } from "@/models/Product";
+import styled from "styled-components";
 
+const PaddingTop = styled.div`
+    padding-top: 70px;
+`;
 
 export default function ProductsPage({products}) {
     console.log({products});
@@ -12,7 +16,9 @@ export default function ProductsPage({products}) {
         <>
             <Header />
             <Center>
-                <Title>Tất Cả Sản Phẩm</Title>
+                <PaddingTop>
+                    <Title className="padding-top: 20px">Tất Cả Sản Phẩm</Title>
+                </PaddingTop>
                 <ProductsGrid products={products} />
             </Center>
         </>
