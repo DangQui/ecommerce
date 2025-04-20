@@ -19,7 +19,11 @@ export default function Nav({show}) {
     }
 
     return (
-        <aside className={(show?'left-0': '-left-full')+" top-0 text-gray-500 p-4 pr-0 fixed w-full bg-slate-50 h-full md:static md:w-auto transition-all"}>
+        <aside
+            className={`${
+                show || window.innerWidth >= 768 ? "translate-x-0" : "-translate-x-full"
+            } top-0 text-gray-500 p-4 pr-0 fixed w-full bg-slate-50 h-full md:translate-x-0 md:static md:w-auto transition-transform duration-300 z-50`}
+        >
             <div className="mb-4 mr-4">
                 <Logo />
             </div>

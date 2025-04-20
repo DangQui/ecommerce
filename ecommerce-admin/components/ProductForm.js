@@ -5,6 +5,7 @@ import { useRouter } from "next/router";
 import { useEffect, useState } from "react";
 import Spinner from "./Spinner";
 import { ReactSortable } from "react-sortablejs";
+import { useNotification } from "@/context/NotificationContext";
 
 // Hàm format số với dấu chấm (ví dụ: 1234567 -> 1.234.567)
 function formatNumberWithDots(number) {
@@ -25,13 +26,18 @@ export default function ProductForm({
   category: assignedCategory,
   properties: assignedProperties,
 }) {
+  const notificationContext = useNotification();
+  const showNotification = notificationContext?.showNotification || ((message, type) => {
+    alert(message);
+  });
+
   const [title, setTitle] = useState(existingTitle || "");
   const [description, setDescription] = useState(existingDescription || "");
   const [category, setCategory] = useState(assignedCategory || '');
   const [productProperties, setProductProperties] = useState(assignedProperties || {});
-  const [price, setPrice] = useState(existingPrice || ""); // Giá trị thực tế (không có dấu chấm)
+  const [price, setPrice] = useState(existingPrice || "");
   const [displayPrice, setDisplayPrice] = useState(
-    existingPrice ? formatNumberWithDots(existingPrice) : "" // Giá trị hiển thị (có dấu chấm)
+    existingPrice ? formatNumberWithDots(existingPrice) : ""
   );
   const [images, setImages] = useState(existingImages || []);
   const [goToProducts, setGoToProducts] = useState(false);
@@ -41,28 +47,32 @@ export default function ProductForm({
 
   useEffect(() => {
     axios.get('/api/categories').then(result => {
-        setCategories(result.data);
-    })
+      setCategories(result.data);
+    });
   }, []);
 
   async function saveProduct(ev) {
     ev.preventDefault();
     const data = {
-      title, 
-      description, 
-      price, 
-      images, 
-      category, 
+      title,
+      description,
+      price,
+      images,
+      category,
       properties: productProperties,
-    }; // price ở đây là giá trị thực tế (không có dấu chấm)
-    if (_id) {
-      // Cập nhật sản phẩm
-      await axios.put("/api/products", { ...data, _id });
-    } else {
-      // Thêm mới sản phẩm
-      await axios.post("/api/products", data);
+    };
+    try {
+      if (_id) {
+        await axios.put("/api/products", { ...data, _id });
+        showNotification("Cập nhật sản phẩm thành công");
+      } else {
+        await axios.post("/api/products", data);
+        showNotification("Thêm sản phẩm thành công");
+      }
+      setGoToProducts(true);
+    } catch (error) {
+      showNotification(error.response?.data?.error || "Lưu sản phẩm thất bại", "error");
     }
-    setGoToProducts(true);
   }
 
   if (goToProducts) {
@@ -77,11 +87,17 @@ export default function ProductForm({
       for (const file of files) {
         data.append("file", file);
       }
-      const res = await axios.post("/api/upload", data);
-      setImages((oldImages) => {
-        return [...oldImages, ...res.data.links];
-      });
-      setIsUploading(false);
+      try {
+        const res = await axios.post("/api/upload", data);
+        setImages((oldImages) => {
+          return [...oldImages, ...res.data.links];
+        });
+        showNotification("Tải ảnh lên thành công");
+      } catch (error) {
+        showNotification("Tải ảnh lên thất bại", "error");
+      } finally {
+        setIsUploading(false);
+      }
     }
   }
 
@@ -89,9 +105,19 @@ export default function ProductForm({
     setImages(images);
   }
 
+  async function removeImage(link) {
+    try {
+      await axios.delete(`/api/upload?link=${encodeURIComponent(link)}`);
+      setImages((oldImages) => oldImages.filter((image) => image !== link));
+      showNotification("Xóa hình ảnh thành công");
+    } catch (error) {
+      showNotification("Xóa hình ảnh thất bại", "error");
+    }
+  }
+
   function setProductProp(propName, value) {
     setProductProperties(prev => {
-      const newProductProps = {...prev};
+      const newProductProps = { ...prev };
       newProductProps[propName] = value;
       return newProductProps;
     });
@@ -99,29 +125,26 @@ export default function ProductForm({
 
   const propertiesToFill = [];
   if (categories.length > 0 && category) {
-    let catInfo = categories.find(({_id}) => _id === category);
+    let catInfo = categories.find(({ _id }) => _id === category);
     propertiesToFill.push(...catInfo.properties);
-    while(catInfo?.parent?._id) {
-      const parentCat = categories.find(({_id}) => _id === catInfo?.parent?._id);
+    while (catInfo?.parent?._id) {
+      const parentCat = categories.find(({ _id }) => _id === catInfo?.parent?._id);
       propertiesToFill.push(...parentCat.properties);
       catInfo = parentCat;
     }
   }
 
-  // Hàm xử lý khi người dùng nhập giá
   function handlePriceChange(ev) {
     const inputValue = ev.target.value;
-    // Loại bỏ các ký tự không phải số và dấu chấm
     const numericValue = parseNumberWithDots(inputValue);
-    // Chỉ cho phép số
     if (numericValue === "" || !isNaN(numericValue)) {
-      setPrice(numericValue); // Lưu giá trị thực tế (không có dấu chấm)
-      setDisplayPrice(numericValue ? formatNumberWithDots(numericValue) : ""); // Cập nhật giá trị hiển thị (có dấu chấm)
+      setPrice(numericValue);
+      setDisplayPrice(numericValue ? formatNumberWithDots(numericValue) : "");
     }
   }
 
   return (
-    <form onSubmit={saveProduct}>
+    <form onSubmit={saveProduct} className="relative">
       <label>Tên sản phẩm</label>
       <input
         type="text"
@@ -130,22 +153,22 @@ export default function ProductForm({
         onChange={(ev) => setTitle(ev.target.value)}
       />
       <label>Danh mục</label>
-      <select value={category} 
-              onChange={ev => setCategory(ev.target.value)}>
+      <select value={category} onChange={ev => setCategory(ev.target.value)}>
         <option value="">Chưa phân loại</option>
         {categories.length > 0 &&
-            categories.map((c) => (
+          categories.map((c) => (
             <option key={c._id} value={c._id}>
-                {c.name}
+              {c.name}
             </option>
-        ))}
+          ))}
       </select>
       {propertiesToFill.length > 0 && propertiesToFill.map(p => (
         <div key={p.name} className="">
           <label>{p.name[0].toUpperCase() + p.name.substring(1)}</label>
           <div>
-            <select value={productProperties[p.name]} 
-                    onChange={ev => setProductProp(p.name, ev.target.value)}
+            <select
+              value={productProperties[p.name]}
+              onChange={ev => setProductProp(p.name, ev.target.value)}
             >
               {p.values.map(v => (
                 <option key={v} value={v}>{v}</option>
@@ -163,8 +186,31 @@ export default function ProductForm({
         >
           {!!images?.length &&
             images.map((link) => (
-              <div key={link} className="h-24 bg-white p-4 shadow-sm rounded-sm border border-gray-200">
-                <img src={link} alt="" className="rounded-lg" />
+              <div
+                key={link}
+                className="h-24 bg-white p-4 shadow-sm rounded-sm border border-gray-200 relative group"
+              >
+                <img src={link} alt="" className="rounded-lg h-full w-full object-cover" />
+                <button
+                  type="button"
+                  onClick={() => removeImage(link)}
+                  className="absolute top-1 right-1 bg-red-600 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity delete-button"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth={1.5}
+                    stroke="currentColor"
+                    className="size-4"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M6 18L18 6M6 6l12 12"
+                    />
+                  </svg>
+                </button>
               </div>
             ))}
         </ReactSortable>
@@ -206,10 +252,10 @@ export default function ProductForm({
       />
       <label>Giá (VND)</label>
       <input
-        type="text" // Đổi type từ "number" thành "text" để hiển thị dấu chấm
+        type="text"
         placeholder="Nhập giá sản phẩm"
-        value={displayPrice} // Hiển thị giá trị có dấu chấm
-        onChange={handlePriceChange} // Xử lý khi người dùng nhập
+        value={displayPrice}
+        onChange={handlePriceChange}
       />
       <button type="submit" className="btn-primary">Lưu</button>
     </form>

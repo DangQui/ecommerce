@@ -25,46 +25,42 @@ body {
   font-family: Arial, Helvetica, sans-serif;
 }
 
-img{
+img {
   max-height: 100%;
 }
 
-input, textarea, select{
+input, textarea, select {
   @apply border border-gray-200 rounded-sm px-1 w-full py-2 px-3;
   @apply shadow-md;
   @apply mb-2;
 }
 
-button{
+button {
   @apply cursor-pointer;
 }
 
-/* input:hover, textarea:hover{
-  @apply border-blue-900;
-} */
-
-input:focus, textarea:focus, select:focus{
+input:focus, textarea:focus, select:focus {
   @apply border-blue-900;
 }
 
-h1{
+h1 {
   @apply text-gray-800 mb-4 text-xl;
 }
 
-label{
+label {
   @apply text-gray-600 text-sm;
 }
 
-.btn-primary{
+.btn-primary {
   @apply bg-indigo-600 text-white px-4 py-1 rounded-sm cursor-pointer shadow-sm;
 }
 
-table.basic{
+table.basic {
   @apply w-full bg-white rounded-sm shadow-md;
 }
 
 table.basic thead tr td,
-table.basic thead tr th{
+table.basic thead tr th {
   @apply text-sm text-gray-600 uppercase border-b border-gray-300 px-4 py-2;
 }
 
@@ -72,14 +68,24 @@ table.basic tr td {
   @apply px-4 py-1;
 }
 
-table.basic a{
-  @apply  px-4 rounded-sm cursor-pointer inline-flex mx-1 items-center gap-1 text-sm py-1;
+table.basic a {
+  @apply px-4 rounded-sm cursor-pointer inline-flex mx-1 items-center gap-1 text-sm py-1;
 }
 
-.btn-red{
+.btn-red {
   @apply bg-red-500 text-white px-4 py-1 rounded-sm cursor-pointer shadow-sm;
 }
 
-.btn-default{
+.btn-default {
   @apply bg-white text-gray-800 px-4 py-1 rounded-sm cursor-pointer border border-gray-300;
+}
+
+/* Hiệu ứng cho nút xóa hình ảnh */
+.delete-button {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.delete-button:hover {
+  transform: scale(1.1);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
