@@ -22,6 +22,10 @@ const ColWrapper = styled.div`
     margin: 40px 0;
 `;
 
+const PageWrapper = styled.div`
+    margin-top: 120px; /* Thêm khoảng cách giữa header và nội dung */
+`;
+
 const PriceRow = styled.div`
     gap: 20px;
     display: flex;
@@ -32,47 +36,47 @@ const Price = styled.span`
     font-size: 1.5rem;
 `;
 
-export default function ProductPage({product}) {
+export default function ProductPage({ product }) {
+    const { addProduct } = useContext(CartContext);
 
-    const {addProduct} = useContext(CartContext);
+    function addToCart() {
+        addProduct(product._id);
+    }
 
     return (
         <>
             <Header />
-            <Center>
-                <ColWrapper>
-                    <WhiteBox>
-                        <ProductImages images={product.images} />   
-                    </WhiteBox>
-                    <div>
-                        <Title>{product.title}</Title>
-                        <p>{product.description}</p>
-
-                        <PriceRow>
-                            <div>
-                                <Price>{product.price.toLocaleString('vi-VN')} VND </Price>
-                            </div>
-                            <div>
-                                <Button primary onClick={() => addProduct(product._id)}>
-                                    <CartIcon/> 
+            <PageWrapper>
+                <Center>
+                    <ColWrapper>
+                        <WhiteBox>
+                            <ProductImages images={product.images} />
+                        </WhiteBox>
+                        <div>
+                            <Title>{product.title}</Title>
+                            <p>{product.description}</p>
+                            <PriceRow>
+                                <Price>{product.price.toLocaleString("vi-VN")} VND</Price>
+                                <Button primary outline onClick={addToCart}>
+                                    <CartIcon />
                                     Thêm vào giỏ hàng
                                 </Button>
-                            </div>
-                        </PriceRow>
-                    </div>
-                </ColWrapper>
-            </Center>
+                            </PriceRow>
+                        </div>
+                    </ColWrapper>
+                </Center>
+            </PageWrapper>
         </>
     );
 }
 
-export async function getServerSideProps (context) {
+export async function getServerSideProps(context) {
     await mongooseConnect();
-    const {id} = context.query;
+    const { id } = context.query;
     const product = await Product.findById(id);
     return {
         props: {
             product: JSON.parse(JSON.stringify(product)),
-        }
-    }
+        },
+    };
 }

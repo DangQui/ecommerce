@@ -1,7 +1,7 @@
 import styled from "styled-components";
 
 const PaddingTop = styled.div`
-    padding-top: 40px;
+    padding-top: 60px;
 `;
 
 export default PaddingTop;

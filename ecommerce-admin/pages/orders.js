@@ -1,7 +1,6 @@
 import Layout from "@/components/Layout";
-import { Order } from "@/models/Order";
-import axios from "axios";
 import { useEffect, useState } from "react";
+import axios from "axios";
 
 export default function OrdersPage() {
     const [orders, setOrders] = useState([]);
@@ -14,7 +13,7 @@ export default function OrdersPage() {
 
     return (
         <Layout>
-            <h1>Đơn Hàng Đặt</h1>
+            <h1>Danh Sách Đơn Hàng</h1>
             <table className="basic">
                 <thead>
                     <tr>
@@ -26,22 +25,21 @@ export default function OrdersPage() {
                 </thead>
                 <tbody>
                     {orders.length > 0 && orders.map(order => (
-                        <tr key={order._id}> {/* Thêm key để tránh warning của React */}
+                        <tr key={order._id}>
                             <td>{(new Date(order.createdAt)).toLocaleDateString()}</td>
                             <td className={order.paid ? 'text-green-600' : 'text-red-600'}>
                                 {order.paid ? 'Đã thanh toán' : 'Chưa thanh toán'}
                             </td>
                             <td>
-                                {order.name} {order.email} <br />   
-                                {order.city} {order.postalCode} <br/>
-                                {order.phoneNumber} <br/>
-                                {order.streetAddress} 
+                                {order.name} <br />
+                                {order.email} <br />
+                                {order.city}, {order.postalCode} <br />
+                                {order.streetAddress}
                             </td>
                             <td>
-                                {order.line_items.map((l, index) => (
-                                    <span key={index}> {/* Thêm key cho map */}
-                                        {l.price_data?.product_data?.name} x 
-                                        {l.quantity} <br/>
+                                {order.line_items.map((item, index) => (
+                                    <span key={index}>
+                                        {item.price_data.product_data.name} x {item.quantity} <br />
                                     </span>
                                 ))}
                             </td>

@@ -7,7 +7,7 @@ import { Product } from "@/models/Product";
 import styled from "styled-components";
 
 const PaddingTop = styled.div`
-    padding-top: 70px;
+    padding-top: 80px;
 `;
 
 export default function ProductsPage({products}) {
