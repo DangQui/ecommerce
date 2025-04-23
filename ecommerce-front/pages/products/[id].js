@@ -9,7 +9,7 @@ import { Product } from "@/models/Product";
 import styled from "styled-components";
 import { primary } from './../../lib/colors';
 import CartIcon from "@/components/icon/CartIcon";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { CartContext } from "@/components/CartContext";
 
 const ColWrapper = styled.div`
@@ -36,11 +36,57 @@ const Price = styled.span`
     font-size: 1.5rem;
 `;
 
+const Notification = styled.div`
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1002;
+    background-color: #4caf50; /* Màu xanh lá cây */
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.9rem;
+    animation: slideDown 0.5s ease-in-out forwards, fadeOut 0.5s ease-in-out 4.5s forwards;
+
+    @keyframes slideDown {
+        0% {
+            transform: translateY(-100%);
+            opacity: 0;
+        }
+        100% {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    @keyframes fadeOut {
+        0% {
+            opacity: 1;
+        }
+        100% {
+            opacity: 0;
+            transform: translateY(-100%);
+        }
+    }
+
+    &:before {
+        content: '✔';
+        font-size: 1.2rem;
+    }
+`;
+
 export default function ProductPage({ product }) {
     const { addProduct } = useContext(CartContext);
+    const [showNotification, setShowNotification] = useState(false);
 
     function addToCart() {
         addProduct(product._id);
+        setShowNotification(true);
     }
 
     return (
@@ -65,6 +111,11 @@ export default function ProductPage({ product }) {
                         </div>
                     </ColWrapper>
                 </Center>
+                {showNotification && (
+                    <Notification onAnimationEnd={() => setShowNotification(false)}>
+                        Đã thêm vào giỏ hàng!
+                    </Notification>
+                )}
             </PageWrapper>
         </>
     );

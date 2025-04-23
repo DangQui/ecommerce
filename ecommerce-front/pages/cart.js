@@ -192,7 +192,7 @@ export default function CartPage() {
 
                     {!!cartProducts?.length && (
                         <Box>
-                            <h2>Thông tin đơn hàng</h2>
+                            <h2>Thông tin người đặt</h2>
                             <Input
                                 type="text"
                                 placeholder="Họ tên"

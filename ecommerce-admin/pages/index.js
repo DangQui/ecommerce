@@ -31,7 +31,7 @@ export default function Home() {
                     Xin chào, <b>{session?.user?.name}</b>
                 </h2>
                 <div className="flex bg-gray-300 gap-2 text-black rounded-lg overflow-hidden items-center">
-                    <img src={session?.user?.image} alt="" className="w-8 h-8 rounded-full" />
+                    <img src={session?.user?.image} alt="" className="w-8 h-8" /> 
                     <span className="px-2">
                         {session?.user?.name}
                     </span>

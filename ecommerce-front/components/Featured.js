@@ -3,15 +3,15 @@ import Center from "./Center";
 import Button from "./Button";
 import ButtonLink from "./ButtonLink";
 import CartIcon from "./icon/CartIcon";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { CartContext } from "./CartContext";
 
 const Bg = styled.div`
     background-color: #222;
     color: #fff;
     padding: 110px 0; // 110px 0
-
 `;
+
 const Title = styled.h1`
     margin: 0;
     font-weight: normal;
@@ -20,10 +20,12 @@ const Title = styled.h1`
 
     }
 `;
+
 const Desc = styled.p`
     color: #aaa;
     font-size: .8rem;
 `;
+
 const ColumnsWrapper = styled.div`
     display: grid;
     grid-template-columns: 1fr;
@@ -47,27 +49,76 @@ const ColumnsWrapper = styled.div`
         }
     }
 `;
+
 const Column = styled.div`
     display: flex;
     align-items: center;
 `;
+
 const ButtonWrapper = styled.div`
     display: flex;
     gap: 10px;
     margin-top: 25px;
 `;
+
 const LoadingMessage = styled.div`
     text-align: center;
     font-size: 1.2rem;
     color: #aaa;
 `;
 
+const Notification = styled.div`
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 1002;
+    background-color: #4caf50; /* Màu xanh lá cây */
+    color: white;
+    padding: 10px 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.9rem;
+    animation: slideDown 0.5s ease-in-out forwards, fadeOut 0.5s ease-in-out 4.5s forwards;
+
+    @keyframes slideDown {
+        0% {
+            transform: translateY(-100%);
+            opacity: 0;
+        }
+        100% {
+            transform: translateY(0);
+            opacity: 1;
+        }
+    }
+
+    @keyframes fadeOut {
+        0% {
+            opacity: 1;
+        }
+        100% {
+            opacity: 0;
+            transform: translateY(-100%);
+        }
+    }
+
+    &:before {
+        content: '✔';
+        font-size: 1.2rem;
+    }
+`;
+
 export default function Featured({ product }) {
     const { addProduct } = useContext(CartContext);
+    const [showNotification, setShowNotification] = useState(false);
 
     function addFeaturedToCart() {
         if (product?._id) {
             addProduct(product._id);
+            setShowNotification(true);
         }
     }
 
@@ -109,6 +160,11 @@ export default function Featured({ product }) {
                     </Column>
                 </ColumnsWrapper>
             </Center>
+            {showNotification && (
+                <Notification onAnimationEnd={() => setShowNotification(false)}>
+                    Đã thêm vào giỏ hàng!
+                </Notification>
+            )}
         </Bg>
     );
 }

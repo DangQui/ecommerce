@@ -14,10 +14,6 @@ const ProductWrapper = styled.div`
         opacity: 1;
         transform: translateY(0);
     }
-    &:hover {
-        transform: translateY(-5px); /* Nâng toàn bộ ô lên một chút khi hover */
-        transition: transform 0.3s ease; /* Hiệu ứng mượt mà */
-    }
 `;
 
 const WhiteBox = styled(Link)`
@@ -29,14 +25,14 @@ const WhiteBox = styled(Link)`
     align-items: center;
     justify-content: center;
     border-radius: 10px;
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    transition: transform 0.3s ease, box-shadow 0.3s ease; /* Khôi phục transition cho hiệu ứng hover */
     img {
         max-width: 100%;
         max-height: 80px;
     }
     &:hover {
-        transform: scale(1.05);
-        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        transform: scale(1.05); /* Phóng to nhẹ khi hover */
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Thêm bóng nhẹ khi hover */
     }
 `;
 
@@ -49,10 +45,6 @@ const Title = styled(Link)`
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    transition: color 0.3s ease; /* Thêm transition cho màu chữ */
-    &:hover {
-        color: #007bff; /* Đổi màu chữ thành xanh dương khi hover */
-    }
 `;
 
 const ProductInfoBox = styled.div`

@@ -21,23 +21,32 @@ export const authOptions = {
   ],
   adapter: MongoDBAdapter(clientPromise),
   callbacks: {
-    session: async ({ session, token, user }) => {
-      await mongooseConnect(); // Kết nối MongoDB
+    async signIn({ user, account, profile }) {
+      // Kết nối MongoDB để kiểm tra bảng admins
+      await mongooseConnect();
 
-      // Kiểm tra nếu email là email gốc
-      if (adminEmails.includes(session?.user?.email)) {
-        session.user.isAdmin = true; // Đánh dấu là quản trị viên
-        return session;
+      // Kiểm tra xem email có trong bảng admins không
+      const admin = await Admin.findOne({ email: user.email });
+
+      // Nếu email không tồn tại trong bảng admins và cũng không phải tài khoản gốc
+      if (!admin && !adminEmails.includes(user.email)) {
+        throw new Error('Không có quyền đăng nhập.');
       }
 
-      // Kiểm tra email trong collection Admin
+      // Nếu email có trong bảng admins hoặc là tài khoản gốc, cho phép đăng nhập
+      return true;
+    },
+    async session({ session, token, user }) {
+      await mongooseConnect();
+      if (adminEmails.includes(session?.user?.email)) {
+        session.user.isAdmin = true;
+        return session;
+      }
       const admin = await Admin.findOne({ email: session?.user?.email });
       if (admin) {
-        session.user.isAdmin = true; // Đánh dấu là quản trị viên
+        session.user.isAdmin = true;
         return session;
       }
-
-      // Nếu không phải quản trị viên
       session.user.isAdmin = false;
       return session;
     },
@@ -47,10 +56,8 @@ export const authOptions = {
 export default NextAuth(authOptions);
 
 export async function isAdminRequest(req, res) {
-  await mongooseConnect(); // Kết nối MongoDB
+  await mongooseConnect();
   const session = await getServerSession(req, res, authOptions);
-
-  // Kiểm tra nếu không có session hoặc không phải quản trị viên
   if (!session || !session.user.isAdmin) {
     res.status(401).json({ error: 'Bạn không có quyền truy cập' });
     throw new Error('Không phải quản trị viên');

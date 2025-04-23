@@ -5,6 +5,9 @@ import axios from "axios";
 export default function AdminsPage() {
     const [admins, setAdmins] = useState([]);
     const [email, setEmail] = useState("");
+    const [notification, setNotification] = useState({ message: "", type: "" });
+    const [showModal, setShowModal] = useState(false);
+    const [adminToDelete, setAdminToDelete] = useState(null);
 
     useEffect(() => {
         fetchAdmins();
@@ -17,27 +20,50 @@ export default function AdminsPage() {
 
     const addAdmin = async () => {
         if (!email) {
-            alert("Vui lòng nhập email");
+            setNotification({ message: "Vui lòng nhập email", type: "error" });
+            setTimeout(() => setNotification({ message: "", type: "" }), 3000);
             return;
         }
         try {
             await axios.post("/api/admins", { email });
             setEmail("");
             fetchAdmins();
+            setNotification({ message: "Thêm quản trị viên thành công", type: "success" });
+            setTimeout(() => setNotification({ message: "", type: "" }), 3000);
         } catch (error) {
-            alert(error.response?.data?.error || "Không thể thêm quản trị viên");
+            setNotification({
+                message: error.response?.data?.error || "Không thể thêm quản trị viên",
+                type: "error",
+            });
+            setTimeout(() => setNotification({ message: "", type: "" }), 3000);
         }
     };
 
-    const deleteAdmin = async (id) => {
-        if (confirm("Bạn có chắc chắn muốn xóa quản trị viên này?")) {
-            try {
-                await axios.delete(`/api/admins?id=${id}`);
-                fetchAdmins();
-            } catch (error) {
-                alert(error.response?.data?.error || "Không thể xóa quản trị viên");
-            }
+    const confirmDelete = (id) => {
+        setAdminToDelete(id);
+        setShowModal(true);
+    };
+
+    const deleteAdmin = async () => {
+        try {
+            await axios.delete(`/api/admins?id=${adminToDelete}`);
+            fetchAdmins();
+            setShowModal(false);
+            setNotification({ message: "Xóa quản trị viên thành công", type: "success" });
+            setTimeout(() => setNotification({ message: "", type: "" }), 3000);
+        } catch (error) {
+            setShowModal(false);
+            setNotification({
+                message: error.response?.data?.error || "Không thể xóa quản trị viên",
+                type: "error",
+            });
+            setTimeout(() => setNotification({ message: "", type: "" }), 3000);
         }
+    };
+
+    const closeModal = () => {
+        setShowModal(false);
+        setAdminToDelete(null);
     };
 
     return (
@@ -53,11 +79,42 @@ export default function AdminsPage() {
                 />
                 <button
                     onClick={addAdmin}
-                    className="bg-indigo-600 text-white px-4 py-2 rounded-sm"
+                    className="bg-indigo-600 text-white px-4 py-2 rounded-sm hover:bg-indigo-700"
                 >
                     Thêm quản trị viên
                 </button>
             </div>
+            {notification.message && (
+                <div
+                    className={`fixed top-4 right-4 p-4 rounded-lg shadow-lg text-white ${
+                        notification.type === "success" ? "bg-green-500" : "bg-red-500"
+                    }`}
+                >
+                    {notification.message}
+                </div>
+            )}
+            {showModal && (
+                <div className="fixed inset-0 flex items-center justify-center z-50">
+                    <div className="bg-white p-6 rounded-lg shadow-lg max-w-sm w-full">
+                        <h2 className="text-lg font-bold mb-4">Xác nhận xóa</h2>
+                        <p className="mb-6">Bạn có chắc chắn muốn xóa quản trị viên này?</p>
+                        <div className="flex justify-end gap-4">
+                            <button
+                                onClick={closeModal}
+                                className="bg-gray-300 text-black px-4 py-2 rounded-sm hover:bg-gray-400"
+                            >
+                                Hủy bỏ
+                            </button>
+                            <button
+                                onClick={deleteAdmin}
+                                className="bg-red-500 text-white px-4 py-2 rounded-sm hover:bg-red-600"
+                            >
+                                Xóa
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
             <div className="overflow-x-auto">
                 <table className="w-full bg-white shadow-md rounded-lg text-center">
                     <thead className="bg-gray-100">
@@ -77,8 +134,8 @@ export default function AdminsPage() {
                                         <span className="text-gray-500">Không thể xóa</span>
                                     ) : (
                                         <button
-                                            onClick={() => deleteAdmin(admin._id)}
-                                            className="bg-red-500 text-white px-4 py-1 rounded-sm"
+                                            onClick={() => confirmDelete(admin._id)}
+                                            className="bg-red-500 text-white px-4 py-1 rounded-sm hover:bg-red-600"
                                         >
                                             Xóa
                                         </button>
