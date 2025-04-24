@@ -10,17 +10,23 @@
   },
   "dependencies": {
     "axios": "^1.8.4",
+    "bcrypt": "^5.1.1",
     "bcryptjs": "^3.0.2",
+    "firebase": "^11.6.0",
+    "js-cookie": "^3.0.5",
+    "jsonwebtoken": "^9.0.2",
     "micro": "^10.0.1",
     "mongoose": "^8.13.2",
     "next": "15.3.0",
     "next-auth": "^4.24.11",
+    "nodemailer": "^6.10.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-helmet": "^6.1.0",
     "react-toastify": "^11.0.5",
     "stripe": "^18.0.0",
-    "styled-components": "^6.1.17"
+    "styled-components": "^6.1.17",
+    "twilio": "^5.5.2"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

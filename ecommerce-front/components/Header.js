@@ -6,6 +6,8 @@ import { CartContext } from "./CartContext";
 import BarsIcon from "./icon/Bars";
 import SearchIcon from "./icon/Search";
 import { useRouter } from "next/router";
+import { useAuth } from "../context/AuthContext";
+import LoginPromptModal from "./LoginPromptModal";
 
 const StyledHeader = styled.header`
     background-color: #222;
@@ -198,10 +200,12 @@ const SuggestionItem = styled.li`
 
 export default function Header() {
     const { cartProducts } = useContext(CartContext);
+    const { isAuthenticated, logout } = useAuth();
     const [mobileNavActive, setMobileNavActive] = useState(false);
     const [searchActive, setSearchActive] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const [suggestions, setSuggestions] = useState([]);
+    const [showModal, setShowModal] = useState(false);
     const router = useRouter();
 
     useEffect(() => {
@@ -230,62 +234,82 @@ export default function Header() {
         }
     };
 
+    const handleNavClick = (e, href) => {
+        if ((href === '/account' || href === '/cart') && !isAuthenticated) {
+            e.preventDefault();
+            setShowModal(true);
+        }
+    };
+
+    const handleLogout = () => {
+        logout();
+        router.push('/login');
+    };
+
     return (
-        <StyledHeader>
-            <Center>
-                <Wrapper>
-                    <Logo href={'/'}>QuisK Shop</Logo>
-                    <StyledNav mobileNavActive={mobileNavActive}>
-                        <NavLink href={'/'}>Trang chủ</NavLink>
-                        <NavLink href={'/products'}>Sản phẩm</NavLink>
-                        <NavLink href={'/categories'}>Danh mục</NavLink>
-                        <NavLink href={'/account'}>Tài khoản</NavLink>
-                        <NavLink href={'/cart'}>Giỏ hàng (<span id="cart-icon">{cartProducts.length}</span>)</NavLink>
-                    </StyledNav>
-                    <SearchWrapper>
-                        <SearchInputWrapper>
-                            <SearchInput
-                                type="text"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                onKeyDown={handleKeyDown}
-                                placeholder="Tìm kiếm sản phẩm..."
-                                autoFocus
-                            />
-                            <SearchIconWrapper>
+        <>
+            <StyledHeader>
+                <Center>
+                    <Wrapper>
+                        <Logo href={'/'}>QuisK Shop</Logo>
+                        <StyledNav mobileNavActive={mobileNavActive}>
+                            <NavLink href={'/'} onClick={(e) => handleNavClick(e, '/')}>Trang chủ</NavLink>
+                            <NavLink href={'/products'} onClick={(e) => handleNavClick(e, '/products')}>Sản phẩm</NavLink>
+                            <NavLink href={'/categories'} onClick={(e) => handleNavClick(e, '/categories')}>Danh mục</NavLink>
+                            <NavLink href={'/account'} onClick={(e) => handleNavClick(e, '/account')}>Tài khoản</NavLink>
+                            <NavLink href={'/cart'} onClick={(e) => handleNavClick(e, '/cart')}>
+                                Giỏ hàng (<span id="cart-icon">{cartProducts.length}</span>)
+                            </NavLink>
+                            {isAuthenticated && (
+                                <NavLink href={'#'} onClick={handleLogout}>Đăng xuất</NavLink>
+                            )}
+                        </StyledNav>
+                        <SearchWrapper>
+                            <SearchInputWrapper>
+                                <SearchInput
+                                    type="text"
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    onKeyDown={handleKeyDown}
+                                    placeholder="Tìm kiếm sản phẩm..."
+                                    autoFocus
+                                />
+                                <SearchIconWrapper>
+                                    <SearchIcon />
+                                </SearchIconWrapper>
+                            </SearchInputWrapper>
+                            <SearchButton onClick={handleSearchClick} title="Tìm kiếm">
                                 <SearchIcon />
-                            </SearchIconWrapper>
-                        </SearchInputWrapper>
-                        <SearchButton onClick={handleSearchClick} title="Tìm kiếm">
-                            <SearchIcon />
-                        </SearchButton>
-                        {searchActive && (
-                            <SearchInput
-                                type="text"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                onKeyDown={handleKeyDown}
-                                placeholder="Tìm kiếm sản phẩm..."
-                                autoFocus
-                            />
-                        )}
-                        {suggestions.length > 0 && (
-                            <SuggestionsList>
-                                {suggestions.map(product => (
-                                    <SuggestionItem key={product._id}>
-                                        <Link href={`/products/${product._id}`} onClick={() => { setSearchActive(false); setSearchQuery(""); }}>
-                                            {product.title}
-                                        </Link>
-                                    </SuggestionItem>
-                                ))}
-                            </SuggestionsList>
-                        )}
-                    </SearchWrapper>
-                    <NavButton onClick={() => setMobileNavActive(prev => !prev)}>
-                        <BarsIcon />
-                    </NavButton>
-                </Wrapper>
-            </Center>
-        </StyledHeader>
+                            </SearchButton>
+                            {searchActive && (
+                                <SearchInput
+                                    type="text"
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    onKeyDown={handleKeyDown}
+                                    placeholder="Tìm kiếm sản phẩm..."
+                                    autoFocus
+                                />
+                            )}
+                            {suggestions.length > 0 && (
+                                <SuggestionsList>
+                                    {suggestions.map(product => (
+                                        <SuggestionItem key={product._id}>
+                                            <Link href={`/products/${product._id}`} onClick={() => { setSearchActive(false); setSearchQuery(""); }}>
+                                                {product.title}
+                                            </Link>
+                                        </SuggestionItem>
+                                    ))}
+                                </SuggestionsList>
+                            )}
+                        </SearchWrapper>
+                        <NavButton onClick={() => setMobileNavActive(prev => !prev)}>
+                            <BarsIcon />
+                        </NavButton>
+                    </Wrapper>
+                </Center>
+            </StyledHeader>
+            {showModal && <LoginPromptModal onClose={() => setShowModal(false)} />}
+        </>
     );
 }
