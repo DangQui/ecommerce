@@ -42,7 +42,7 @@ export default async function handler(req, res) {
             const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
 
             const mailOptions = {
-                from: process.env.EMAIL_USER,
+                from: `QuisK Shop <${process.env.EMAIL_USER}>`, // Thay đổi phần người gửi thành "QuisK Shop"
                 to: user.email,
                 subject: 'Mã Xác Thực Đăng Nhập',
                 html: `
@@ -52,7 +52,7 @@ export default async function handler(req, res) {
                     <p>Mã này có hiệu lực trong 3 phút. Vui lòng nhập mã để hoàn tất đăng nhập.</p>
                     <p>Nếu bạn không thực hiện đăng nhập này, vui lòng bỏ qua email này.</p>
                     <p>Trân trọng,</p>
-                    <p>Đội ngũ của chúng tôi</p>
+                    <p>Đội ngũ QuisK Shop</p>
                 `,
             };
 

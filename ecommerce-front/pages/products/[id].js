@@ -2,6 +2,7 @@ import Button from "@/components/Button";
 import Center from "@/components/Center";
 import Header from "@/components/Header";
 import ProductImages from "@/components/ProductImages";
+import Review from "@/components/Review"; // Thêm import Review component
 import Title from "@/components/Title";
 import WhiteBox from "@/components/WhiteBox";
 import { mongooseConnect } from "@/lib/mongoose";
@@ -10,7 +11,7 @@ import styled from "styled-components";
 import { primary } from './../../lib/colors';
 import CartIcon from "@/components/icon/CartIcon";
 import { useContext, useState } from "react";
-import { CartContext } from "@/components/CartContext";
+import { CartContext } from "@/context/CartContext";
 
 const ColWrapper = styled.div`
     display: grid;
@@ -110,6 +111,8 @@ export default function ProductPage({ product }) {
                             </PriceRow>
                         </div>
                     </ColWrapper>
+                    {/* Tích hợp Review component */}
+                    <Review productId={product._id} />
                 </Center>
                 {showNotification && (
                     <Notification onAnimationEnd={() => setShowNotification(false)}>

@@ -4,12 +4,14 @@ import Button from "./Button";
 import ButtonLink from "./ButtonLink";
 import CartIcon from "./icon/CartIcon";
 import { useContext, useState } from "react";
-import { CartContext } from "./CartContext";
+import { CartContext } from "../context/CartContext";
+import { useAuth } from "../context/AuthContext";
+import LoginPromptModal from "./LoginPromptModal";
 
 const Bg = styled.div`
     background-color: #222;
     color: #fff;
-    padding: 110px 0; // 110px 0
+    padding: 110px 0;
 `;
 
 const Title = styled.h1`
@@ -17,7 +19,6 @@ const Title = styled.h1`
     font-weight: normal;
     font-size: 1.5rem;
     @media screen and (min-width: 768px) {
-
     }
 `;
 
@@ -72,7 +73,7 @@ const Notification = styled.div`
     top: 20px;
     right: 20px;
     z-index: 1002;
-    background-color: #4caf50; /* Màu xanh lá cây */
+    background-color: #4caf50;
     color: white;
     padding: 10px 20px;
     border-radius: 8px;
@@ -113,9 +114,16 @@ const Notification = styled.div`
 
 export default function Featured({ product }) {
     const { addProduct } = useContext(CartContext);
+    const { isAuthenticated } = useAuth();
     const [showNotification, setShowNotification] = useState(false);
+    const [showModal, setShowModal] = useState(false);
 
     function addFeaturedToCart() {
+        if (!isAuthenticated) {
+            setShowModal(true);
+            return;
+        }
+
         if (product?._id) {
             addProduct(product._id);
             setShowNotification(true);
@@ -134,37 +142,40 @@ export default function Featured({ product }) {
     }
 
     return (
-        <Bg>
-            <Center>
-                <ColumnsWrapper>
-                    <Column>
-                        <div>
-                            <Title>{product.title}</Title>
-                            <Desc>{product.description}</Desc>
-                            <ButtonWrapper>
-                                <ButtonLink href={`/pr/${product._id}`} outline={1} white={1}>
-                                    Đọc thêm
-                                </ButtonLink>
-                                <Button onClick={addFeaturedToCart} white>
-                                    <CartIcon />
-                                    Thêm vào Giỏ hàng
-                                </Button>
-                            </ButtonWrapper>
-                        </div>
-                    </Column>
-                    <Column>
-                        <img
-                            src={product.images?.[0] || "https://quisk-next-ecommerce.s3.amazonaws.com/1744792123229.png"}
-                            alt={product.title}
-                        />
-                    </Column>
-                </ColumnsWrapper>
-            </Center>
-            {showNotification && (
-                <Notification onAnimationEnd={() => setShowNotification(false)}>
-                    Đã thêm vào giỏ hàng!
-                </Notification>
-            )}
-        </Bg>
+        <>
+            <Bg>
+                <Center>
+                    <ColumnsWrapper>
+                        <Column>
+                            <div>
+                                <Title>{product.title}</Title>
+                                <Desc>{product.description}</Desc>
+                                <ButtonWrapper>
+                                    <ButtonLink href="/products/68021c6365a0a5fb189caef7" outline={1} white={1}>
+                                        Đọc thêm
+                                    </ButtonLink>
+                                    <Button onClick={addFeaturedToCart} white>
+                                        <CartIcon />
+                                        Thêm vào Giỏ hàng
+                                    </Button>
+                                </ButtonWrapper>
+                            </div>
+                        </Column>
+                        <Column>
+                            <img
+                                src={product.images?.[0] || "https://quisk-next-ecommerce.s3.amazonaws.com/1744792123229.png"}
+                                alt={product.title}
+                            />
+                        </Column>
+                    </ColumnsWrapper>
+                </Center>
+                {showNotification && (
+                    <Notification onAnimationEnd={() => setShowNotification(false)}>
+                        Đã thêm vào giỏ hàng!
+                    </Notification>
+                )}
+            </Bg>
+            {showModal && <LoginPromptModal onClose={() => setShowModal(false)} />}
+        </>
     );
 }

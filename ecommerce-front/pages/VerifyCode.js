@@ -93,6 +93,13 @@ const ResendLink = styled.a`
     font-size: 14px;
     cursor: pointer;
     margin: 10px 0;
+    display: inline-block; /* Đảm bảo hiển thị dưới dạng inline-block */
+    text-decoration: underline; /* Thêm gạch chân để nổi bật */
+    font-weight: 500; /* Tăng độ đậm để dễ nhìn */
+    &:hover {
+        color: #1557b0; /* Đổi màu khi hover để tăng tương tác */
+        text-decoration: none; /* Bỏ gạch chân khi hover */
+    }
 `;
 
 const ErrorText = styled.p`
@@ -112,7 +119,7 @@ export default function VerifyCode() {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const router = useRouter();
-    const { email } = router.query;
+    const { email, type = 'registration' } = router.query; // Lấy thêm type từ query, mặc định là 'registration'
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -125,7 +132,7 @@ export default function VerifyCode() {
             const res = await fetch('/api/verify', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, code }),
+                body: JSON.stringify({ email, code, type }),
             });
             const data = await res.json();
 
@@ -144,15 +151,17 @@ export default function VerifyCode() {
 
     const handleResend = async () => {
         try {
-            const res = await fetch('/api/register', {
+            const res = await fetch('/api/resend-code', { // Gọi API resend-code mới
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email }),
+                body: JSON.stringify({ email, type }), // Gửi email và type
             });
+            const data = await res.json();
+
             if (res.status === 200) {
-                setSuccess('Mã xác thực mới đã được gửi!');
+                setSuccess('Mã xác thực mới đã được gửi đến email của bạn!');
             } else {
-                setError('Không thể gửi lại mã, vui lòng thử lại');
+                setError(data.error || 'Không thể gửi lại mã, vui lòng thử lại');
             }
         } catch (error) {
             setError('Có lỗi xảy ra, vui lòng thử lại');
@@ -163,11 +172,11 @@ export default function VerifyCode() {
         <Container>
             <Card>
                 <Illustration>
-                    <img src="/images/verify-illustration.png" alt="Hình minh họa xác thực" style={{ maxWidth: '100%' }} />
+                    <img src="../public/images/login-illustration.jpg" alt="Hình minh họa xác thực" style={{ maxWidth: '100%' }} />
                 </Illustration>
                 <FormContainer>
-                    <Logo>LOGO CỦA BẠN</Logo>
-                    <Title>Xác Thực Mã</Title>
+                    <Logo>QuisK Shop</Logo>
+                    <Title>{type === '2fa-login' ? 'Xác Thực 2 Bước' : 'Xác Thực Mã'}</Title>
                     <Subtitle>Một mã xác thực đã được gửi đến email của bạn.</Subtitle>
                     <form onSubmit={handleSubmit}>
                         <Input

@@ -3,7 +3,9 @@ import Button from "./Button";
 import CartIcon from "./icon/CartIcon";
 import Link from "next/link";
 import { useContext, useState, useEffect, useRef } from "react";
-import { CartContext } from "./CartContext";
+import { CartContext } from "../context/CartContext";
+import { useAuth } from "../context/AuthContext"; // Nhập useAuth
+import LoginPromptModal from "./LoginPromptModal"; // Nhập LoginPromptModal
 
 const ProductWrapper = styled.div`
     margin-top: 0px;
@@ -13,6 +15,10 @@ const ProductWrapper = styled.div`
     &.visible {
         opacity: 1;
         transform: translateY(0);
+    }
+    &:hover {
+        transform: translateY(-5px); /* Nâng nhẹ khi hover */
+        transition: transform 0.3s ease;
     }
 `;
 
@@ -25,7 +31,7 @@ const WhiteBox = styled(Link)`
     align-items: center;
     justify-content: center;
     border-radius: 10px;
-    transition: transform 0.3s ease, box-shadow 0.3s ease; /* Khôi phục transition cho hiệu ứng hover */
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
     img {
         max-width: 100%;
         max-height: 80px;
@@ -91,9 +97,11 @@ const FlyingImage = styled.img`
 
 export default function ProductBox({ _id, title, description, price, images }) {
     const { addProduct } = useContext(CartContext);
+    const { isAuthenticated } = useAuth(); // Sử dụng useAuth để kiểm tra trạng thái đăng nhập
     const url = '/products/' + _id;
     const [flyingImage, setFlyingImage] = useState(null);
     const [isVisible, setIsVisible] = useState(false);
+    const [showModal, setShowModal] = useState(false); // Thêm trạng thái showModal
     const productRef = useRef(null);
 
     const formatPrice = (price) => {
@@ -127,6 +135,14 @@ export default function ProductBox({ _id, title, description, price, images }) {
 
     const handleAddToCart = (e) => {
         e.preventDefault();
+
+        // Kiểm tra nếu người dùng chưa đăng nhập
+        if (!isAuthenticated) {
+            setShowModal(true); // Hiển thị modal yêu cầu đăng nhập
+            return;
+        }
+
+        // Nếu đã đăng nhập, tiếp tục thêm sản phẩm vào giỏ hàng
         addProduct(_id);
 
         const imageElement = e.currentTarget.closest('.product-wrapper').querySelector('img');
@@ -189,24 +205,27 @@ export default function ProductBox({ _id, title, description, price, images }) {
     };
 
     return (
-        <ProductWrapper
-            className={`product-wrapper ${isVisible ? 'visible' : ''}`}
-            ref={productRef}
-        >
-            <WhiteBox href={url}>
-                <div>
-                    <img src={images?.[0]} alt="" />
-                </div>
-            </WhiteBox>
-            <ProductInfoBox>
-                <Title href={url}>{title}</Title>
-                <PriceRow>
-                    <Price>{formatPrice(price)}</Price>
-                    <Button onClick={handleAddToCart} primary={true} outline={true}>
-                        <CartIcon />
-                    </Button>
-                </PriceRow>
-            </ProductInfoBox>
-        </ProductWrapper>
+        <>
+            <ProductWrapper
+                className={`product-wrapper ${isVisible ? 'visible' : ''}`}
+                ref={productRef}
+            >
+                <WhiteBox href={url}>
+                    <div>
+                        <img src={images?.[0]} alt="" />
+                    </div>
+                </WhiteBox>
+                <ProductInfoBox>
+                    <Title href={url}>{title}</Title>
+                    <PriceRow>
+                        <Price>{formatPrice(price)}</Price>
+                        <Button onClick={handleAddToCart} primary={true} outline={true}>
+                            <CartIcon />
+                        </Button>
+                    </PriceRow>
+                </ProductInfoBox>
+            </ProductWrapper>
+            {showModal && <LoginPromptModal onClose={() => setShowModal(false)} />}
+        </>
     );
 }

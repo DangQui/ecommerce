@@ -1,5 +1,5 @@
 import { createGlobalStyle } from "styled-components";
-import { CartContextProvider } from "@/components/CartContext";
+import { CartContextProvider } from "@/context/CartContext";
 import { AuthProvider } from '../context/AuthContext';
 
 const GlobalStyles = createGlobalStyle`

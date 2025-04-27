@@ -2,7 +2,7 @@ import Link from "next/link";
 import styled from "styled-components";
 import Center from "./Center";
 import { useContext, useState, useEffect } from "react";
-import { CartContext } from "./CartContext";
+import { CartContext } from "../context/CartContext";
 import BarsIcon from "./icon/Bars";
 import SearchIcon from "./icon/Search";
 import { useRouter } from "next/router";
@@ -58,11 +58,16 @@ const StyledNav = styled.nav`
 
 const NavLink = styled(Link)`
     display: block;
-    color: #aaa;
+    color: ${props => props.active ? '#fff' : '#aaa'}; /* Màu trắng khi active, xám khi không active */
     text-decoration: none;
     padding: 10px 0;
+    font-weight: ${props => props.active ? '600' : 'normal'}; /* Đậm hơn khi active */
+    transition: color 0.2s ease, font-weight 0.2s ease; /* Hiệu ứng chuyển màu mượt mà */
     @media screen and (min-width: 768px) {
         padding: 0;
+    }
+    &:hover {
+        color: #fff; /* Màu trắng khi hover */
     }
 `;
 
@@ -253,15 +258,15 @@ export default function Header() {
                     <Wrapper>
                         <Logo href={'/'}>QuisK Shop</Logo>
                         <StyledNav mobileNavActive={mobileNavActive}>
-                            <NavLink href={'/'} onClick={(e) => handleNavClick(e, '/')}>Trang chủ</NavLink>
-                            <NavLink href={'/products'} onClick={(e) => handleNavClick(e, '/products')}>Sản phẩm</NavLink>
-                            <NavLink href={'/categories'} onClick={(e) => handleNavClick(e, '/categories')}>Danh mục</NavLink>
-                            <NavLink href={'/account'} onClick={(e) => handleNavClick(e, '/account')}>Tài khoản</NavLink>
-                            <NavLink href={'/cart'} onClick={(e) => handleNavClick(e, '/cart')}>
+                            <NavLink href={'/'} onClick={(e) => handleNavClick(e, '/')} active={router.pathname === '/'}>Trang chủ</NavLink>
+                            <NavLink href={'/products'} onClick={(e) => handleNavClick(e, '/products')} active={router.pathname === '/products'}>Sản phẩm</NavLink>
+                            <NavLink href={'/categories'} onClick={(e) => handleNavClick(e, '/categories')} active={router.pathname === '/categories'}>Danh mục</NavLink>
+                            <NavLink href={'/account'} onClick={(e) => handleNavClick(e, '/account')} active={router.pathname === '/account'}>Tài khoản</NavLink>
+                            <NavLink href={'/cart'} onClick={(e) => handleNavClick(e, '/cart')} active={router.pathname === '/cart'}>
                                 Giỏ hàng (<span id="cart-icon">{cartProducts.length}</span>)
                             </NavLink>
                             {isAuthenticated && (
-                                <NavLink href={'#'} onClick={handleLogout}>Đăng xuất</NavLink>
+                                <NavLink href={'#'} onClick={handleLogout} active={false}>Đăng xuất</NavLink>
                             )}
                         </StyledNav>
                         <SearchWrapper>

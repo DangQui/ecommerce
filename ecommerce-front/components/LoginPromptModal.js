@@ -91,7 +91,7 @@ export default function LoginPromptModal({ onClose }) {
                     <LogoImage src="/images/smber-logo.png" alt="Smber Logo" />
                 </Logo>
                 <Message>
-                    Vui lòng đăng nhập tài khoản Smember để xem ưu đãi và thanh toán để đăng ký hon.
+                    Vui lòng đăng nhập tài khoản để xem ưu đãi và thanh toán.
                 </Message>
                 <ButtonWrapper>
                     <Button onClick={handleRegister}>Đăng ký</Button>

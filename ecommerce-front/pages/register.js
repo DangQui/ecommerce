@@ -30,7 +30,6 @@ const Illustration = styled.div`
     justify-content: center;
     align-items: center;
     background: #f5f7fa;
-    padding: 20px;
     @media (max-width: 768px) {
         display: none;
     }
@@ -72,9 +71,11 @@ const InputWrapper = styled.div`
 const Input = styled.input`
     width: 100%;
     padding: 10px;
+    padding-right: 40px; /* Dành chỗ cho icon */
     border: 1px solid ${props => props.error ? '#ff0000' : '#ddd'};
     border-radius: 5px;
     font-size: 14px;
+    box-sizing: border-box; /* Bao gồm padding và border trong chiều rộng */
     &:focus {
         outline: none;
         border-color: ${props => props.error ? '#ff0000' : '#1a73e8'};
@@ -87,6 +88,11 @@ const IconWrapper = styled.div`
     top: 50%;
     transform: translateY(-50%);
     cursor: pointer;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 `;
 
 const Button = styled.button`
@@ -143,6 +149,7 @@ export default function Register() {
     const [success, setSuccess] = useState('');
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+    const [showVerificationCode, setShowVerificationCode] = useState(false);
     const router = useRouter();
 
     const validateForm = () => {
@@ -151,25 +158,25 @@ export default function Register() {
         const phoneRegex = /^\d{10}$/;
         const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])(?=.{8,})/;
 
-        if (!formData.fullName) newErrors.fullName = 'Vui lòng nhập họ và tên';
+        if (!formData.fullName) newErrors.fullName = 'Yêu cầu không bỏ trống';
         if (!formData.email) {
-            newErrors.email = 'Vui lòng nhập email';
+            newErrors.email = 'Yêu cầu không bỏ trống';
         } else if (!emailRegex.test(formData.email)) {
             newErrors.email = 'Email không đúng định dạng';
         }
         if (!formData.phone) {
-            newErrors.phone = 'Vui lòng nhập số điện thoại';
+            newErrors.phone = 'Yêu cầu không bỏ trống';
         } else if (!phoneRegex.test(formData.phone)) {
             newErrors.phone = 'Số điện thoại phải có đúng 10 chữ số';
         }
-        if (!formData.birthDate) newErrors.birthDate = 'Vui lòng chọn ngày sinh';
+        if (!formData.birthDate) newErrors.birthDate = 'Yêu cầu không bỏ trống';
         if (!formData.password) {
-            newErrors.password = 'Vui lòng nhập mật khẩu';
+            newErrors.password = 'Yêu cầu không bỏ trống';
         } else if (!passwordRegex.test(formData.password)) {
             newErrors.password = 'Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ thường, chữ hoa và ký tự đặc biệt';
         }
         if (!formData.confirmPassword) {
-            newErrors.confirmPassword = 'Vui lòng nhập lại mật khẩu';
+            newErrors.confirmPassword = 'Yêu cầu không bỏ trống';
         } else if (formData.password !== formData.confirmPassword) {
             newErrors.confirmPassword = 'Mật khẩu nhập lại không khớp';
         }
@@ -181,10 +188,25 @@ export default function Register() {
     const validateVerificationForm = () => {
         const newErrors = {};
         if (!verificationData.code) {
-            newErrors.code = 'Vui lòng nhập mã xác thực';
+            newErrors.code = 'Yêu cầu không bỏ trống';
         }
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
+    };
+
+    const handleBlur = (e, formType) => {
+        const { name, value } = e.target;
+        if (!value) {
+            setErrors(prev => ({
+                ...prev,
+                [name]: 'Yêu cầu không bỏ trống',
+            }));
+        } else {
+            setErrors(prev => ({
+                ...prev,
+                [name]: '',
+            }));
+        }
     };
 
     const handleRegisterSubmit = async (e) => {
@@ -252,10 +274,10 @@ export default function Register() {
         <Container>
             <Card>
                 <Illustration>
-                    <img src="/images/register-illustration.png" alt="Hình minh họa đăng ký" style={{ maxWidth: '100%' }} />
+                    <img src="../images/login-illustration-removebg-preview.png" alt="Hình minh họa đăng ký" style={{ maxWidth: '100%' }} />
                 </Illustration>
                 <FormContainer>
-                    <Logo>LOGO CỦA BẠN</Logo>
+                    <Logo>QuisK Shop</Logo>
                     {step === 1 ? (
                         <>
                             <Title>Đăng Ký</Title>
@@ -268,6 +290,7 @@ export default function Register() {
                                         placeholder="Họ và tên"
                                         value={formData.fullName}
                                         onChange={(e) => handleChange(e, 'register')}
+                                        onBlur={(e) => handleBlur(e, 'register')}
                                         error={errors.fullName}
                                     />
                                     {errors.fullName && <ErrorText>{errors.fullName}</ErrorText>}
@@ -279,6 +302,7 @@ export default function Register() {
                                         placeholder="Email"
                                         value={formData.email}
                                         onChange={(e) => handleChange(e, 'register')}
+                                        onBlur={(e) => handleBlur(e, 'register')}
                                         error={errors.email}
                                     />
                                     {errors.email && <ErrorText>{errors.email}</ErrorText>}
@@ -290,6 +314,7 @@ export default function Register() {
                                         placeholder="Số điện thoại"
                                         value={formData.phone}
                                         onChange={(e) => handleChange(e, 'register')}
+                                        onBlur={(e) => handleBlur(e, 'register')}
                                         error={errors.phone}
                                     />
                                     {errors.phone && <ErrorText>{errors.phone}</ErrorText>}
@@ -300,6 +325,7 @@ export default function Register() {
                                         name="birthDate"
                                         value={formData.birthDate}
                                         onChange={(e) => handleChange(e, 'register')}
+                                        onBlur={(e) => handleBlur(e, 'register')}
                                         error={errors.birthDate}
                                     />
                                     {errors.birthDate && <ErrorText>{errors.birthDate}</ErrorText>}
@@ -311,6 +337,7 @@ export default function Register() {
                                         placeholder="Mật khẩu"
                                         value={formData.password}
                                         onChange={(e) => handleChange(e, 'register')}
+                                        onBlur={(e) => handleBlur(e, 'register')}
                                         error={errors.password}
                                     />
                                     <IconWrapper onClick={() => setShowPassword(!showPassword)}>
@@ -325,6 +352,7 @@ export default function Register() {
                                         placeholder="Nhập lại mật khẩu"
                                         value={formData.confirmPassword}
                                         onChange={(e) => handleChange(e, 'register')}
+                                        onBlur={(e) => handleBlur(e, 'register')}
                                         error={errors.confirmPassword}
                                     />
                                     <IconWrapper onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
@@ -346,13 +374,17 @@ export default function Register() {
                             <form onSubmit={handleVerificationSubmit}>
                                 <InputWrapper>
                                     <Input
-                                        type="text"
+                                        type={showVerificationCode ? 'text' : 'password'}
                                         name="code"
                                         placeholder="Nhập mã xác thực"
                                         value={verificationData.code}
                                         onChange={(e) => handleChange(e, 'verify')}
+                                        onBlur={(e) => handleBlur(e, 'verify')}
                                         error={errors.code}
                                     />
+                                    <IconWrapper onClick={() => setShowVerificationCode(!showVerificationCode)}>
+                                        {showVerificationCode ? <EyeHiddenIcon /> : <EyeShowIcon />}
+                                    </IconWrapper>
                                     {errors.code && <ErrorText>{errors.code}</ErrorText>}
                                 </InputWrapper>
                                 {success && <SuccessText>{success}</SuccessText>}

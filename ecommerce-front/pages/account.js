@@ -4,84 +4,181 @@ import EyeShowIcon from '../components/icon/EyeShow';
 import EyeHiddenIcon from '../components/icon/EyeHidden';
 import { useAuth } from '../context/AuthContext';
 import { useRouter } from 'next/router';
-import Header from '../components/Header'; // Import Header.js
+import Header from '../components/Header';
+import Center from '../components/Center';
+import axios from 'axios';
 
 const MainContainer = styled.div`
     display: flex;
     flex-direction: column;
     min-height: 100vh;
-    background-color: #f5f7fa;
+    background-color: #eee;
+    padding-top: 80px;
 `;
 
-const Container = styled.div`
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 80px 20px 20px; /* Thêm padding-top để không bị che bởi Header */
-    flex: 1;
-`;
-
-const Card = styled.div`
-    background: white;
-    border-radius: 20px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-    padding: 40px;
-    max-width: 600px;
-    width: 100%;
-    position: relative;
-`;
-
-const BackButton = styled.button`
-    position: absolute;
-    top: 20px;
-    left: 20px;
-    background: none;
-    border: none;
-    font-size: 24px;
-    cursor: pointer;
-    color: #1a73e8;
-    &:hover {
-        color: #1557b0;
+const ColumnsWrapper = styled.div`
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+    margin-top: 10px;
+    padding: 10px;
+    @media screen and (max-width: 600px) {
+        gap: 15px;
+        padding: 8px;
+    }
+    @media screen and (min-width: 601px) and (max-width: 767px) {
+        gap: 25px;
+        padding: 12px;
+    }
+    @media screen and (min-width: 768px) {
+        grid-template-columns: 1.2fr 0.8fr;
+        gap: 40px;
+        padding: 20px;
+        padding-left: 0;
     }
 `;
 
-const Title = styled.h1`
-    font-size: 24px;
+const HistoryBox = styled.div`
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    order: 2;
+    @media screen and (max-width: 600px) {
+        padding: 12px;
+    }
+    @media screen and (min-width: 601px) and (max-width: 767px) {
+        padding: 15px;
+    }
+    @media screen and (min-width: 768px) {
+        width: 500px;
+        padding: 30px;
+        order: 1;
+    }
+`;
+
+const DetailBox = styled.div`
+    background-color: #fff;
+    border-radius: 10px;
+    padding: 15px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    width: 100%;
+    box-sizing: border-box; /* Đảm bảo padding không làm tăng chiều rộng */
+    order: 1;
+    @media screen and (max-width: 600px) {
+        padding: 12px;
+    }
+    @media screen and (min-width: 601px) and (max-width: 767px) {
+        padding: 15px;
+    }
+    @media screen and (min-width: 768px) {
+        width: 300px;
+        padding: 30px;
+        order: 2;
+    }
+`;
+
+const Title = styled.h2`
+    font-size: 22px;
     font-weight: bold;
-    margin-bottom: 20px;
-    text-align: center;
+    margin-bottom: 15px;
+    text-align: left;
+    color: #000;
+    @media screen and (max-width: 600px) {
+        font-size: 20px;
+        margin-bottom: 12px;
+    }
+    @media screen and (min-width: 601px) and (max-width: 767px) {
+        font-size: 22px;
+        margin-bottom: 15px;
+    }
+    @media screen and (min-width: 768px) {
+        font-size: 26px;
+        margin-bottom: 20px;
+    }
 `;
 
 const SectionTitle = styled.h2`
-    font-size: 18px;
+    font-size: 16px;
     font-weight: bold;
-    margin: 20px 0 10px;
+    margin: 15px 0 10px;
+    @media screen and (max-width: 600px) {
+        font-size: 14px;
+        margin: 12px 0 8px;
+    }
+    @media screen and (min-width: 601px) and (max-width: 767px) {
+        font-size: 15px;
+        margin: 14px 0 9px;
+    }
+    @media screen and (min-width: 768px) {
+        font-size: 18px;
+        margin: 20px 0 10px;
+    }
 `;
 
 const PasswordToggle = styled.div`
-    font-size: 16px;
+    font-size: 14px;
     color: #1a73e8;
     cursor: pointer;
-    margin: 20px 0;
+    margin: 15px 0;
     &:hover {
         text-decoration: underline;
+    }
+    @media screen and (max-width: 600px) {
+        font-size: 13px;
+        margin: 12px 0;
+    }
+    @media screen and (min-width: 601px) and (max-width: 767px) {
+        font-size: 14px;
+        margin: 14px 0;
+    }
+    @media screen and (min-width: 768px) {
+        font-size: 16px;
+        margin: 20px 0;
     }
 `;
 
 const InputWrapper = styled.div`
     position: relative;
-    margin: 10px 0;
+    margin: 8px 0;
+    width: 100%; /* Đảm bảo không tràn */
+    @media screen and (max-width: 600px) {
+        margin: 6px 0;
+    }
+    @media screen and (min-width: 601px) and (max-width: 767px) {
+        margin: 7px 0;
+    }
+    @media screen and (min-width: 768px) {
+        margin: 10px 0;
+    }
 `;
 
 const Input = styled.input`
     width: 100%;
-    padding: 10px;
+    padding: 8px;
+    padding-right: ${props => props.type === 'password' ? '35px' : '8px'}; /* Giảm padding-right trên mobile */
     border: 1px solid ${props => props.error ? '#ff0000' : '#ddd'};
     border-radius: 5px;
     font-size: 14px;
+    box-sizing: border-box; /* Đảm bảo padding không làm tăng chiều rộng */
     &:focus {
         outline: none;
         border-color: ${props => props.error ? '#ff0000' : '#1a73e8'};
+    }
+    @media screen and (max-width: 600px) {
+        padding: 6px;
+        padding-right: ${props => props.type === 'password' ? '30px' : '6px'};
+        font-size: 13px;
+    }
+    @media screen and (min-width: 601px) and (max-width: 767px) {
+        padding: 7px;
+        padding-right: ${props => props.type === 'password' ? '32px' : '7px'};
+        font-size: 13px;
+    }
+    @media screen and (min-width: 768px) {
+        padding: 10px;
+        padding-right: ${props => props.type === 'password' ? '40px' : '10px'};
     }
 `;
 
@@ -91,18 +188,46 @@ const IconWrapper = styled.div`
     top: 50%;
     transform: translateY(-50%);
     cursor: pointer;
+    width: 20px; /* Giới hạn chiều rộng của icon */
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    @media screen and (max-width: 600px) {
+        right: 8px;
+        width: 18px;
+        height: 18px;
+    }
 `;
 
 const ToggleWrapper = styled.div`
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin: 20px 0;
+    margin: 15px 0;
+    @media screen and (max-width: 600px) {
+        margin: 12px 0;
+    }
+    @media screen and (min-width: 601px) and (max-width: 767px) {
+        margin: 14px 0;
+    }
+    @media screen and (min-width: 768px) {
+        margin: 20px 0;
+    }
 `;
 
 const ToggleLabel = styled.label`
-    font-size: 16px;
+    font-size: 14px;
     color: #333;
+    @media screen and (max-width: 600px) {
+        font-size: 13px;
+    }
+    @media screen and (min-width: 601px) and (max-width: 767px) {
+        font-size: 13px;
+    }
+    @media screen and (min-width: 768px) {
+        font-size: 16px;
+    }
 `;
 
 const ToggleSwitch = styled.input`
@@ -140,15 +265,60 @@ const ToggleSwitch = styled.input`
 const Button = styled.button`
     background-color: #1a73e8;
     color: white;
-    padding: 10px;
+    padding: 8px;
     border: none;
     border-radius: 5px;
-    font-size: 16px;
+    font-size: 14px;
     cursor: pointer;
-    margin-top: 20px;
+    margin-top: 15px;
     width: 100%;
     &:hover {
         background-color: #1557b0;
+    }
+    @media screen and (max-width: 600px) {
+        padding: 6px;
+        font-size: 13px;
+        margin-top: 12px;
+    }
+    @media screen and (min-width: 601px) and (max-width: 767px) {
+        padding: 7px;
+        font-size: 13px;
+        margin-top: 14px;
+    }
+    @media screen and (min-width: 768px) {
+        padding: 10px;
+        font-size: 16px;
+        margin-top: 20px;
+    }
+`;
+
+const LogoutButton = styled.button`
+    background-color: #1557b0;
+    color: white;
+    padding: 8px;
+    border: none;
+    border-radius: 5px;
+    font-size: 14px;
+    cursor: pointer;
+    margin-top: 15px;
+    width: 100%;
+    &:hover {
+        background-color: #0e3c7e;
+    }
+    @media screen and (max-width: 600px) {
+        padding: 6px;
+        font-size: 13px;
+        margin-top: 12px;
+    }
+    @media screen and (min-width: 601px) and (max-width: 767px) {
+        padding: 7px;
+        font-size: 13px;
+        margin-top: 14px;
+    }
+    @media screen and (min-width: 768px) {
+        padding: 10px;
+        font-size: 16px;
+        margin-top: 20px;
     }
 `;
 
@@ -156,17 +326,58 @@ const ErrorText = styled.p`
     color: #ff0000;
     font-size: 12px;
     margin: 5px 0 0 0;
+    @media screen and (max-width: 600px) {
+        font-size: 11px;
+    }
 `;
 
 const SuccessText = styled.p`
     color: green;
-    font-size: 14px;
-    margin: 10px 0;
+    font-size: 12px;
+    margin: 8px 0;
     text-align: center;
+    @media screen and (max-width: 600px) {
+        font-size: 11px;
+        margin: 6px 0;
+    }
+    @media screen and (min-width: 601px) and (max-width: 767px) {
+        font-size: 12px;
+        margin: 7px 0;
+    }
+    @media screen and (min-width: 768px) {
+        font-size: 14px;
+        margin: 10px 0;
+    }
+`;
+
+const ProductInfoCell = styled.div`
+    padding: 8px 0;
+    @media screen and (max-width: 600px) {
+        padding: 6px 0;
+        font-size: 14px;
+    }
+    @media screen and (min-width: 601px) and (max-width: 767px) {
+        padding: 7px 0;
+        font-size: 14px;
+    }
+    @media screen and (min-width: 768px) {
+        padding: 10px 0;
+        font-size: 16px;
+    }
+`;
+
+const ProductInfoCellFlex = styled.div`
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    @media screen and (min-width: 768px) {
+        flex-direction: row;
+        justify-content: space-between;
+    }
 `;
 
 export default function Account() {
-    const { isAuthenticated, userEmail } = useAuth();
+    const { isAuthenticated, userEmail, logout } = useAuth();
     const router = useRouter();
     const [userData, setUserData] = useState({
         fullName: '',
@@ -180,6 +391,7 @@ export default function Account() {
         newPassword: '',
         confirmNewPassword: '',
     });
+    const [orders, setOrders] = useState([]);
     const [errors, setErrors] = useState({});
     const [success, setSuccess] = useState('');
     const [showOldPassword, setShowOldPassword] = useState(false);
@@ -218,7 +430,19 @@ export default function Account() {
                 setErrors({ general: 'Không thể tải thông tin, vui lòng thử lại' });
             }
         };
+
+        const fetchOrders = async () => {
+            try {
+                const response = await axios.get('/api/orders');
+                setOrders(response.data);
+            } catch (error) {
+                console.error('Lỗi khi lấy danh sách đơn hàng:', error);
+                setErrors({ general: 'Không thể tải lịch sử mua hàng, vui lòng thử lại' });
+            }
+        };
+
         fetchUserData();
+        fetchOrders();
     }, [isAuthenticated, router, userEmail]);
 
     const validateInfoForm = () => {
@@ -335,15 +559,16 @@ export default function Account() {
                 setSuccess(`Xác thực 2 bước đã được ${newValue ? 'bật' : 'tắt'}!`);
                 setErrors({});
             } else {
-                setErrors({ general: data.error || 'Có lỗi xảy ra, vui lòng thử lại' });
+                setErrors({ general: 'Có lỗi xảy ra, vui lòng thử lại' });
             }
         } catch (error) {
             setErrors({ general: 'Có lỗi xảy ra, vui lòng thử lại' });
         }
     };
 
-    const handleBack = () => {
-        router.back();
+    const handleLogout = () => {
+        logout();
+        router.push('/login');
     };
 
     const handleChange = (e, formType) => {
@@ -358,129 +583,162 @@ export default function Account() {
         }
     };
 
+    const userOrders = orders.filter(order => 
+        order.email === userData.email && order.phoneNumber === userData.phone
+    );
+
     if (!isAuthenticated) return null;
 
     return (
         <MainContainer>
             <Header />
-            <Container>
-                <Card>
-                    <BackButton onClick={handleBack}>←</BackButton>
-                    <Title>Quản Lý Tài Khoản</Title>
-                    {success && <SuccessText>{success}</SuccessText>}
-                    {errors.general && <ErrorText>{errors.general}</ErrorText>}
+            <Center>
+                <ColumnsWrapper>
+                    <HistoryBox>
+                        <Title>Lịch Sử Mua Hàng</Title>
+                        {userOrders.length === 0 && <div style={{ fontSize: '14px' }}>Chưa có đơn hàng nào!</div>}
+                        {userOrders.map(order => (
+                            <div key={order._id} style={{ marginBottom: '15px', borderBottom: '1px solid #d1d5dc', paddingBottom: '15px' }}>
+                                <h3 style={{ fontSize: '16px', marginBottom: '8px' }}>
+                                    {(new Date(order.createdAt)).toLocaleString('sv-SE', { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' }).replace(' ', ' ')}
+                                </h3>
+                                <ProductInfoCellFlex>
+                                    <ProductInfoCell style={{ color: '#8b8888' }}>
+                                        {order.name} <br />
+                                        {order.email} <br />
+                                        {order.streetAddres}, {order.city}, {order.postalCode}
+                                    </ProductInfoCell>
+                                    <ProductInfoCell style={{ marginTop: '10px' }}>
+                                        {order.line_items.map((item, index) => (
+                                            <div key={index}>
+                                                {item.quantity} x {item.price_data.product_data.name}
+                                            </div>
+                                        ))}
+                                    </ProductInfoCell>
+                                </ProductInfoCellFlex>
+                            </div>
+                        ))}
+                    </HistoryBox>
 
-                    <SectionTitle>Thông Tin Cá Nhân</SectionTitle>
-                    <form onSubmit={handleInfoSubmit}>
-                        <InputWrapper>
-                            <Input
-                                type="text"
-                                name="fullName"
-                                placeholder="Họ và tên"
-                                value={userData.fullName}
-                                onChange={(e) => handleChange(e, 'info')}
-                                error={errors.fullName}
-                            />
-                            {errors.fullName && <ErrorText>{errors.fullName}</ErrorText>}
-                        </InputWrapper>
-                        <InputWrapper>
-                            <Input
-                                type="email"
-                                name="email"
-                                placeholder="Email"
-                                value={userData.email}
-                                onChange={(e) => handleChange(e, 'info')}
-                                error={errors.email}
-                            />
-                            {errors.email && <ErrorText>{errors.email}</ErrorText>}
-                        </InputWrapper>
-                        <InputWrapper>
-                            <Input
-                                type="tel"
-                                name="phone"
-                                placeholder="Số điện thoại"
-                                value={userData.phone}
-                                onChange={(e) => handleChange(e, 'info')}
-                                error={errors.phone}
-                            />
-                            {errors.phone && <ErrorText>{errors.phone}</ErrorText>}
-                        </InputWrapper>
-                        <InputWrapper>
-                            <Input
-                                type="date"
-                                name="birthDate"
-                                value={userData.birthDate}
-                                onChange={(e) => handleChange(e, 'info')}
-                                error={errors.birthDate}
-                            />
-                            {errors.birthDate && <ErrorText>{errors.birthDate}</ErrorText>}
-                        </InputWrapper>
-                        <Button type="submit">Cập nhật thông tin</Button>
-                    </form>
+                    <DetailBox>
+                        <Title>Thông Tin Tài Khoản</Title>
+                        {success && <SuccessText>{success}</SuccessText>}
+                        {errors.general && <ErrorText>{errors.general}</ErrorText>}
 
-                    <SectionTitle>Đổi Mật Khẩu</SectionTitle>
-                    <PasswordToggle onClick={() => setShowPasswordForm(!showPasswordForm)}>
-                        {showPasswordForm ? 'Ẩn' : 'Đổi mật khẩu'}
-                    </PasswordToggle>
-                    {showPasswordForm && (
-                        <form onSubmit={handlePasswordSubmit}>
+                        <SectionTitle>Thông Tin Cá Nhân</SectionTitle>
+                        <form onSubmit={handleInfoSubmit}>
                             <InputWrapper>
                                 <Input
-                                    type={showOldPassword ? 'text' : 'password'}
-                                    name="oldPassword"
-                                    placeholder="Mật khẩu cũ"
-                                    value={passwordData.oldPassword}
-                                    onChange={(e) => handleChange(e, 'password')}
-                                    error={errors.oldPassword}
+                                    type="text"
+                                    name="fullName"
+                                    placeholder="Họ và tên"
+                                    value={userData.fullName}
+                                    onChange={(e) => handleChange(e, 'info')}
+                                    error={errors.fullName}
                                 />
-                                <IconWrapper onClick={() => setShowOldPassword(!showOldPassword)}>
-                                    {showOldPassword ? <EyeHiddenIcon /> : <EyeShowIcon />}
-                                </IconWrapper>
-                                {errors.oldPassword && <ErrorText>{errors.oldPassword}</ErrorText>}
+                                {errors.fullName && <ErrorText>{errors.fullName}</ErrorText>}
                             </InputWrapper>
                             <InputWrapper>
                                 <Input
-                                    type={showNewPassword ? 'text' : 'password'}
-                                    name="newPassword"
-                                    placeholder="Mật khẩu mới"
-                                    value={passwordData.newPassword}
-                                    onChange={(e) => handleChange(e, 'password')}
-                                    error={errors.newPassword}
+                                    type="email"
+                                    name="email"
+                                    placeholder="Email"
+                                    value={userData.email}
+                                    onChange={(e) => handleChange(e, 'info')}
+                                    error={errors.email}
                                 />
-                                <IconWrapper onClick={() => setShowNewPassword(!showNewPassword)}>
-                                    {showNewPassword ? <EyeHiddenIcon /> : <EyeShowIcon />}
-                                </IconWrapper>
-                                {errors.newPassword && <ErrorText>{errors.newPassword}</ErrorText>}
+                                {errors.email && <ErrorText>{errors.email}</ErrorText>}
                             </InputWrapper>
                             <InputWrapper>
                                 <Input
-                                    type={showConfirmPassword ? 'text' : 'password'}
-                                    name="confirmNewPassword"
-                                    placeholder="Nhập lại mật khẩu mới"
-                                    value={passwordData.confirmNewPassword}
-                                    onChange={(e) => handleChange(e, 'password')}
-                                    error={errors.confirmNewPassword}
+                                    type="tel"
+                                    name="phone"
+                                    placeholder="Số điện thoại"
+                                    value={userData.phone}
+                                    onChange={(e) => handleChange(e, 'info')}
+                                    error={errors.phone}
                                 />
-                                <IconWrapper onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
-                                    {showConfirmPassword ? <EyeHiddenIcon /> : <EyeShowIcon />}
-                                </IconWrapper>
-                                {errors.confirmNewPassword && <ErrorText>{errors.confirmNewPassword}</ErrorText>}
+                                {errors.phone && <ErrorText>{errors.phone}</ErrorText>}
                             </InputWrapper>
-                            <Button type="submit">Thay đổi mật khẩu</Button>
+                            <InputWrapper>
+                                <Input
+                                    type="date"
+                                    name="birthDate"
+                                    value={userData.birthDate}
+                                    onChange={(e) => handleChange(e, 'info')}
+                                    error={errors.birthDate}
+                                />
+                                {errors.birthDate && <ErrorText>{errors.birthDate}</ErrorText>}
+                            </InputWrapper>
+                            <Button type="submit">Cập nhật thông tin</Button>
                         </form>
-                    )}
 
-                    <SectionTitle>Xác Thực 2 Bước</SectionTitle>
-                    <ToggleWrapper>
-                        <ToggleLabel>Trạng thái: {userData.twoFactorEnabled ? 'Đang bật' : 'Đang tắt'}</ToggleLabel>
-                        <ToggleSwitch
-                            type="checkbox"
-                            checked={userData.twoFactorEnabled}
-                            onChange={handleToggle2FA}
-                        />
-                    </ToggleWrapper>
-                </Card>
-            </Container>
+                        <SectionTitle>Đổi Mật Khẩu</SectionTitle>
+                        <PasswordToggle onClick={() => setShowPasswordForm(!showPasswordForm)}>
+                            {showPasswordForm ? 'Ẩn' : 'Đổi mật khẩu'}
+                        </PasswordToggle>
+                        {showPasswordForm && (
+                            <form onSubmit={handlePasswordSubmit}>
+                                <InputWrapper>
+                                    <Input
+                                        type={showOldPassword ? 'text' : 'password'}
+                                        name="oldPassword"
+                                        placeholder="Mật khẩu cũ"
+                                        value={passwordData.oldPassword}
+                                        onChange={(e) => handleChange(e, 'password')}
+                                        error={errors.oldPassword}
+                                    />
+                                    <IconWrapper onClick={() => setShowOldPassword(!showOldPassword)}>
+                                        {showOldPassword ? <EyeHiddenIcon /> : <EyeShowIcon />}
+                                    </IconWrapper>
+                                    {errors.oldPassword && <ErrorText>{errors.oldPassword}</ErrorText>}
+                                </InputWrapper>
+                                <InputWrapper>
+                                    <Input
+                                        type={showNewPassword ? 'text' : 'password'}
+                                        name="newPassword"
+                                        placeholder="Mật khẩu mới"
+                                        value={passwordData.newPassword}
+                                        onChange={(e) => handleChange(e, 'password')}
+                                        error={errors.newPassword}
+                                    />
+                                    <IconWrapper onClick={() => setShowNewPassword(!showNewPassword)}>
+                                        {showNewPassword ? <EyeHiddenIcon /> : <EyeShowIcon />}
+                                    </IconWrapper>
+                                    {errors.newPassword && <ErrorText>{errors.newPassword}</ErrorText>}
+                                </InputWrapper>
+                                <InputWrapper>
+                                    <Input
+                                        type={showConfirmPassword ? 'text' : 'password'}
+                                        name="confirmNewPassword"
+                                        placeholder="Nhập lại mật khẩu mới"
+                                        value={passwordData.confirmNewPassword}
+                                        onChange={(e) => handleChange(e, 'password')}
+                                        error={errors.confirmNewPassword}
+                                    />
+                                    <IconWrapper onClick={() => setShowConfirmPassword(!showConfirmPassword)}>
+                                        {showConfirmPassword ? <EyeHiddenIcon /> : <EyeShowIcon />}
+                                    </IconWrapper>
+                                    {errors.confirmNewPassword && <ErrorText>{errors.confirmNewPassword}</ErrorText>}
+                                </InputWrapper>
+                                <Button type="submit">Thay đổi mật khẩu</Button>
+                            </form>
+                        )}
+
+                        <SectionTitle>Xác Thực 2 Bước</SectionTitle>
+                        <ToggleWrapper>
+                            <ToggleLabel>Trạng thái: {userData.twoFactorEnabled ? 'Đang bật' : 'Đang tắt'}</ToggleLabel>
+                            <ToggleSwitch
+                                type="checkbox"
+                                checked={userData.twoFactorEnabled}
+                                onChange={handleToggle2FA}
+                            />
+                        </ToggleWrapper>
+
+                        <LogoutButton onClick={handleLogout}>Đăng xuất</LogoutButton>
+                    </DetailBox>
+                </ColumnsWrapper>
+            </Center>
         </MainContainer>
     );
 }

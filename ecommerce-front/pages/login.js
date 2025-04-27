@@ -31,7 +31,6 @@ const Illustration = styled.div`
     justify-content: center;
     align-items: center;
     background: #f5f7fa;
-    padding: 20px;
     @media (max-width: 768px) {
         display: none;
     }
@@ -73,9 +72,11 @@ const InputWrapper = styled.div`
 const Input = styled.input`
     width: 100%;
     padding: 10px;
+    padding-right: 40px; /* Dành chỗ cho icon */
     border: 1px solid ${props => props.error ? '#ff0000' : '#ddd'};
     border-radius: 5px;
     font-size: 14px;
+    box-sizing: border-box; /* Bao gồm padding và border trong chiều rộng */
     &:focus {
         outline: none;
         border-color: ${props => props.error ? '#ff0000' : '#1a73e8'};
@@ -88,6 +89,11 @@ const IconWrapper = styled.div`
     top: 50%;
     transform: translateY(-50%);
     cursor: pointer;
+    width: 20px;
+    height: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 `;
 
 const CheckboxContainer = styled.div`
@@ -163,6 +169,7 @@ export default function Login() {
     const [errors, setErrors] = useState({});
     const [success, setSuccess] = useState('');
     const [showPassword, setShowPassword] = useState(false);
+    const [show2FACode, setShow2FACode] = useState(false);
     const [step, setStep] = useState(1);
     const router = useRouter();
 
@@ -177,12 +184,12 @@ export default function Login() {
         const emailPhoneRegex = /^([^\s@]+@[^\s@]+\.[^\s@]+|\d{10})$/;
 
         if (!formData.emailOrPhone) {
-            newErrors.emailOrPhone = 'Vui lòng nhập email hoặc số điện thoại';
+            newErrors.emailOrPhone = 'Yêu cầu không bỏ trống';
         } else if (!emailPhoneRegex.test(formData.emailOrPhone)) {
             newErrors.emailOrPhone = 'Email hoặc số điện thoại không đúng định dạng';
         }
         if (!formData.password) {
-            newErrors.password = 'Vui lòng nhập mật khẩu';
+            newErrors.password = 'Yêu cầu không bỏ trống';
         }
 
         setErrors(newErrors);
@@ -192,10 +199,25 @@ export default function Login() {
     const validate2FAForm = () => {
         const newErrors = {};
         if (!twoFAData.code) {
-            newErrors.code = 'Vui lòng nhập mã xác thực';
+            newErrors.code = 'Yêu cầu không bỏ trống';
         }
         setErrors(newErrors);
         return Object.keys(newErrors).length === 0;
+    };
+
+    const handleBlur = (e, formType) => {
+        const { name, value } = e.target;
+        if (!value) {
+            setErrors(prev => ({
+                ...prev,
+                [name]: 'Yêu cầu không bỏ trống',
+            }));
+        } else {
+            setErrors(prev => ({
+                ...prev,
+                [name]: '',
+            }));
+        }
     };
 
     const handleLoginSubmit = async (e) => {
@@ -275,10 +297,10 @@ export default function Login() {
         <Container>
             <Card>
                 <Illustration>
-                    <img src="/images/login-illustration.png" alt="Hình minh họa đăng nhập" style={{ maxWidth: '100%' }} />
+                    <img src="../images/lock-login.png" alt="Hình minh họa đăng nhập" style={{ maxWidth: '100%' }} />
                 </Illustration>
                 <FormContainer>
-                    <Logo>LOGO CỦA BẠN</Logo>
+                    <Logo>QuisK Shop</Logo>
                     {step === 1 ? (
                         <>
                             <Title>Đăng Nhập</Title>
@@ -291,6 +313,7 @@ export default function Login() {
                                         placeholder="Email hoặc số điện thoại"
                                         value={formData.emailOrPhone}
                                         onChange={(e) => handleChange(e, 'login')}
+                                        onBlur={(e) => handleBlur(e, 'login')}
                                         error={errors.emailOrPhone}
                                     />
                                     {errors.emailOrPhone && <ErrorText>{errors.emailOrPhone}</ErrorText>}
@@ -302,6 +325,7 @@ export default function Login() {
                                         placeholder="Mật khẩu"
                                         value={formData.password}
                                         onChange={(e) => handleChange(e, 'login')}
+                                        onBlur={(e) => handleBlur(e, 'login')}
                                         error={errors.password}
                                     />
                                     <IconWrapper onClick={() => setShowPassword(!showPassword)}>
@@ -317,7 +341,7 @@ export default function Login() {
                                             checked={formData.rememberMe}
                                             onChange={(e) => handleChange(e, 'login')}
                                         />
-                                        <Label>Ghi nhớ tôi</Label>
+                                        <Label>Ghi nhớ</Label>
                                     </div>
                                     <ForgotLink href="/forgot-password">Quên mật khẩu?</ForgotLink>
                                 </CheckboxContainer>
@@ -335,13 +359,17 @@ export default function Login() {
                             <form onSubmit={handle2FASubmit}>
                                 <InputWrapper>
                                     <Input
-                                        type="text"
+                                        type={show2FACode ? 'text' : 'password'}
                                         name="code"
                                         placeholder="Nhập mã xác thực"
                                         value={twoFAData.code}
                                         onChange={(e) => handleChange(e, '2fa')}
+                                        onBlur={(e) => handleBlur(e, '2fa')}
                                         error={errors.code}
                                     />
+                                    <IconWrapper onClick={() => setShow2FACode(!show2FACode)}>
+                                        {show2FACode ? <EyeHiddenIcon /> : <EyeShowIcon />}
+                                    </IconWrapper>
                                     {errors.code && <ErrorText>{errors.code}</ErrorText>}
                                 </InputWrapper>
                                 {success && <SuccessText>{success}</SuccessText>}

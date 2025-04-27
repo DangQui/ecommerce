@@ -40,7 +40,7 @@ export default async function handler(req, res) {
 
         // Gửi email xác thực
         const mailOptions = {
-            from: process.env.EMAIL_USER,
+            from: `QuisK Shop <${process.env.EMAIL_USER}>`, // Thay đổi phần người gửi thành "QuisK Shop"
             to: email,
             subject: 'Mã Xác Thực Đăng Ký Tài Khoản',
             html: `
@@ -50,7 +50,7 @@ export default async function handler(req, res) {
                 <p>Mã này có hiệu lực trong 3 phút. Vui lòng nhập mã vào trang xác thực để hoàn tất đăng ký.</p>
                 <p>Nếu bạn không yêu cầu mã này, vui lòng bỏ qua email này.</p>
                 <p>Trân trọng,</p>
-                <p>Đội ngũ của chúng tôi</p>
+                <p>Đội ngũ QuisK Shop</p>
             `,
         };
 
