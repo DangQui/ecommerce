@@ -88,7 +88,7 @@ export default function LoginPromptModal({ onClose }) {
             <Modal>
                 <CloseButton onClick={onClose}>×</CloseButton>
                 <Logo>
-                    <LogoImage src="/images/smber-logo.png" alt="Smber Logo" />
+                    <LogoImage src="/images/original.png" alt="Smber Logo" />
                 </Logo>
                 <Message>
                     Vui lòng đăng nhập tài khoản để xem ưu đãi và thanh toán.

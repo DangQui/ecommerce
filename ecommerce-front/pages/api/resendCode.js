@@ -18,18 +18,16 @@ export default async function handler(req, res) {
 
     const { email, type } = req.body;
 
-    if (!email || !type || !['2fa-login', 'registration'].includes(type)) {
+    if (!email || !type || !['2fa-login', 'registration', 'forgot-password'].includes(type)) {
         return res.status(400).json({ error: 'Email hoặc loại xác thực không hợp lệ' });
     }
 
     try {
         await mongooseConnect();
 
-        // Tạo mã xác thực mới
         const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
         let fullName = '';
 
-        // Xác định thông tin người dùng dựa trên type
         if (type === '2fa-login') {
             const user = await CustomerUser.findOne({ email });
             if (!user) {
@@ -42,13 +40,18 @@ export default async function handler(req, res) {
                 return res.status(400).json({ error: 'Thông tin người dùng tạm thời không tồn tại' });
             }
             fullName = tempUser.fullName;
+        } else if (type === 'forgot-password') {
+            const user = await CustomerUser.findOne({ email });
+            if (!user) {
+                return res.status(400).json({ error: 'Người dùng không tồn tại' });
+            }
+            fullName = user.fullName;
         }
 
-        // Gửi email với mã xác thực mới
         const mailOptions = {
             from: `QuisK Shop <${process.env.EMAIL_USER}>`,
             to: email,
-            subject: type === '2fa-login' ? 'Mã Xác Thực Đăng Nhập Mới' : 'Mã Xác Thực Đăng Ký Tài Khoản Mới',
+            subject: type === '2fa-login' ? 'Mã Xác Thực Đăng Nhập Mới' : type === 'forgot-password' ? 'Mã Xác Thực Đặt Lại Mật Khẩu Mới' : 'Mã Xác Thực Đăng Ký Tài Khoản Mới',
             html: `
                 <h2>Xin chào ${fullName},</h2>
                 <p>Bạn đã yêu cầu gửi lại mã xác thực.</p>
@@ -62,7 +65,6 @@ export default async function handler(req, res) {
 
         await transporter.sendMail(mailOptions);
 
-        // Cập nhật mã xác thực trong global.tempCodes
         global.tempCodes = global.tempCodes || {};
         global.tempCodes[email] = {
             code: verificationCode,

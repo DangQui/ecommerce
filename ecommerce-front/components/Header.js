@@ -19,10 +19,17 @@ const StyledHeader = styled.header`
 `;
 
 const Logo = styled(Link)`
+    display: flex;
+    align-items: center;
     color: #fff;
     text-decoration: none;
     position: relative;
     z-index: 3;
+`;
+
+const LogoImage = styled.img`
+    width: 50px;
+    height: 50px;
 `;
 
 const Wrapper = styled.div`
@@ -256,7 +263,10 @@ export default function Header() {
             <StyledHeader>
                 <Center>
                     <Wrapper>
-                        <Logo href={'/'}>QuisK Shop</Logo>
+                        <Logo href={'/'}>
+                            <LogoImage src="images/original-removebg-preview.png" alt="Smber Logo" />
+                            QuisK Shop
+                        </Logo>
                         <StyledNav mobileNavActive={mobileNavActive}>
                             <NavLink href={'/'} onClick={(e) => handleNavClick(e, '/')} active={router.pathname === '/'}>Trang chủ</NavLink>
                             <NavLink href={'/products'} onClick={(e) => handleNavClick(e, '/products')} active={router.pathname === '/products'}>Sản phẩm</NavLink>

@@ -9,8 +9,8 @@ export default async function handler(req, res) {
 
     const { email, code, type } = req.body;
 
-    if (!type || !['2fa-login', 'registration'].includes(type)) {
-        return res.status(400).json({ error: 'Loại xác thực không hợp lệ' });
+    if (!email || !code || !type || !['2fa-login', 'registration', 'forgot-password'].includes(type)) {
+        return res.status(400).json({ error: 'Email, mã xác thực hoặc loại xác thực không hợp lệ' });
     }
 
     try {
@@ -74,6 +74,17 @@ export default async function handler(req, res) {
             delete global.tempCodes[email];
 
             res.status(200).json({ message: 'Xác thực thành công! Tài khoản đã được tạo.' });
+        } else if (type === 'forgot-password') {
+            // Xác thực cho quên mật khẩu
+            const user = await CustomerUser.findOne({ email });
+            if (!user) {
+                return res.status(400).json({ error: 'Người dùng không tồn tại' });
+            }
+
+            // Xóa mã xác thực sau khi xác thực thành công
+            delete global.tempCodes[email];
+
+            res.status(200).json({ message: 'Xác thực thành công! Chuyển đến trang đặt lại mật khẩu.' });
         }
     } catch (error) {
         console.error('Lỗi khi xác thực:', error);

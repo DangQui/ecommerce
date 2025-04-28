@@ -52,6 +52,11 @@ const Logo = styled.div`
     color: #1a73e8;
 `;
 
+const LogoImage = styled.img`
+    width: 50px;
+    height: 50px;
+`;
+
 const Title = styled.h1`
     font-size: 24px;
     font-weight: bold;
@@ -274,10 +279,13 @@ export default function Register() {
         <Container>
             <Card>
                 <Illustration>
-                    <img src="../images/login-illustration-removebg-preview.png" alt="Hình minh họa đăng ký" style={{ maxWidth: '100%' }} />
+                    <img src="/images/login-illustration-removebg-preview.png" alt="Hình minh họa đăng ký" style={{ maxWidth: '100%' }} />
                 </Illustration>
                 <FormContainer>
-                    <Logo>QuisK Shop</Logo>
+                    <Logo>
+                        <LogoImage src="/images/original.png" alt="Smber Logo" />
+                        QuisK Shop
+                    </Logo>
                     {step === 1 ? (
                         <>
                             <Title>Đăng Ký</Title>
@@ -321,6 +329,7 @@ export default function Register() {
                                 </InputWrapper>
                                 <InputWrapper>
                                     <Input
+                                        style={{paddingRight: '10px'}}
                                         type="date"
                                         name="birthDate"
                                         value={formData.birthDate}

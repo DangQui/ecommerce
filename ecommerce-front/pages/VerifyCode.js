@@ -50,6 +50,11 @@ const Logo = styled.div`
     color: #1a73e8;
 `;
 
+const LogoImage = styled.img`
+    width: 50px;
+    height: 50px;
+`;
+
 const Title = styled.h1`
     font-size: 24px;
     font-weight: bold;
@@ -83,6 +88,7 @@ const Button = styled.button`
     font-size: 16px;
     cursor: pointer;
     margin-top: 20px;
+    margin-left: 100px;
     &:hover {
         background-color: #1557b0;
     }
@@ -93,12 +99,12 @@ const ResendLink = styled.a`
     font-size: 14px;
     cursor: pointer;
     margin: 10px 0;
-    display: inline-block; /* Đảm bảo hiển thị dưới dạng inline-block */
-    text-decoration: underline; /* Thêm gạch chân để nổi bật */
-    font-weight: 500; /* Tăng độ đậm để dễ nhìn */
+    display: inline-block;
+    text-decoration: underline;
+    font-weight: 500;
     &:hover {
-        color: #1557b0; /* Đổi màu khi hover để tăng tương tác */
-        text-decoration: none; /* Bỏ gạch chân khi hover */
+        color: #1557b0;
+        text-decoration: none;
     }
 `;
 
@@ -119,7 +125,7 @@ export default function VerifyCode() {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
     const router = useRouter();
-    const { email, type = 'registration' } = router.query; // Lấy thêm type từ query, mặc định là 'registration'
+    const { email, type = 'registration' } = router.query;
 
     const handleSubmit = async (e) => {
         e.preventDefault();
@@ -137,9 +143,15 @@ export default function VerifyCode() {
             const data = await res.json();
 
             if (res.status === 200) {
-                setSuccess('Xác thực thành công! Đăng ký hoàn tất.');
-                setTimeout(() => router.push('/login'), 2000);
-            } else if (data.error === 'Verification code has expired') {
+                setSuccess(type === 'forgot-password' ? 'Xác thực thành công! Chuyển đến trang đặt lại mật khẩu.' : 'Xác thực thành công! Đăng ký hoàn tất.');
+                setTimeout(() => {
+                    if (type === 'forgot-password') {
+                        router.push(`/set-password?email=${email}`);
+                    } else {
+                        router.push('/login');
+                    }
+                }, 2000);
+            } else if (data.error === 'Mã xác thực đã hết hạn') {
                 setError('Mã xác thực đã hết hạn, vui lòng yêu cầu mã mới');
             } else {
                 setError(data.error || 'Mã xác thực không đúng');
@@ -151,10 +163,10 @@ export default function VerifyCode() {
 
     const handleResend = async () => {
         try {
-            const res = await fetch('/api/resend-code', { // Gọi API resend-code mới
+            const res = await fetch('/api/resend-code', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, type }), // Gửi email và type
+                body: JSON.stringify({ email, type }),
             });
             const data = await res.json();
 
@@ -172,10 +184,13 @@ export default function VerifyCode() {
         <Container>
             <Card>
                 <Illustration>
-                    <img src="../public/images/login-illustration.jpg" alt="Hình minh họa xác thực" style={{ maxWidth: '100%' }} />
+                    <img src="images/login-illustration-removebg-preview.png" alt="Hình minh họa xác thực" style={{ maxWidth: '100%' }} />
                 </Illustration>
                 <FormContainer>
-                    <Logo>QuisK Shop</Logo>
+                    <Logo>
+                        <LogoImage src="/images/original.png" alt="Smber Logo" />
+                        QuisK Shop
+                    </Logo>
                     <Title>{type === '2fa-login' ? 'Xác Thực 2 Bước' : 'Xác Thực Mã'}</Title>
                     <Subtitle>Một mã xác thực đã được gửi đến email của bạn.</Subtitle>
                     <form onSubmit={handleSubmit}>
