@@ -75,7 +75,7 @@ export default function AdminsPage() {
                     placeholder="Nhập email quản trị viên"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="border border-gray-300 rounded-sm p-2 flex-1"
+                    className="border border-gray-300 rounded-sm p-2 mb-0! flex-1"
                 />
                 <button
                     onClick={addAdmin}

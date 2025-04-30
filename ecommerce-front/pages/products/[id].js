@@ -2,16 +2,31 @@ import Button from "@/components/Button";
 import Center from "@/components/Center";
 import Header from "@/components/Header";
 import ProductImages from "@/components/ProductImages";
-import Review from "@/components/Review"; // Thêm import Review component
+import Review from "@/components/Review";
 import Title from "@/components/Title";
 import WhiteBox from "@/components/WhiteBox";
 import { mongooseConnect } from "@/lib/mongoose";
 import { Product } from "@/models/Product";
+import { Review as ReviewModel } from "@/models/Review"; // Import model Review để lấy dữ liệu
 import styled from "styled-components";
 import { primary } from './../../lib/colors';
 import CartIcon from "@/components/icon/CartIcon";
 import { useContext, useState } from "react";
 import { CartContext } from "@/context/CartContext";
+import { useAuth } from "@/context/AuthContext";
+import LoginPromptModal from "@/components/LoginPromptModal";
+
+// Thêm styled component cho phần hiển thị sao trung bình
+const StarWrapper = styled.div`
+    display: flex;
+    gap: 5px;
+    margin-top: 10px;
+`;
+
+const Star = styled.span`
+    font-size: 1.2rem;
+    color: ${props => (props.filled ? '#FFD700' : '#ccc')};
+`;
 
 const ColWrapper = styled.div`
     display: grid;
@@ -81,14 +96,41 @@ const Notification = styled.div`
     }
 `;
 
-export default function ProductPage({ product }) {
+export default function ProductPage({ product, averageRating }) {
     const { addProduct } = useContext(CartContext);
+    const { isAuthenticated } = useAuth();
     const [showNotification, setShowNotification] = useState(false);
+    const [showModal, setShowModal] = useState(false);
 
     function addToCart() {
-        addProduct(product._id);
-        setShowNotification(true);
+        if (!isAuthenticated) {
+            setShowModal(true);
+        } else {
+            addProduct(product._id);
+            setShowNotification(true);
+        }
     }
+
+    // Hàm để hiển thị sao trung bình
+    const renderAverageRating = () => {
+        if (!averageRating || averageRating === 0) {
+            return <p>Chưa có đánh giá</p>;
+        }
+
+        const roundedRating = Math.round(averageRating); // Làm tròn để hiển thị sao
+        return (
+            <StarWrapper>
+                {[1, 2, 3, 4, 5].map((star) => (
+                    <Star
+                        key={star}
+                        filled={star <= roundedRating}
+                    >
+                        ★
+                    </Star>
+                ))}
+            </StarWrapper>
+        );
+    };
 
     return (
         <>
@@ -101,6 +143,7 @@ export default function ProductPage({ product }) {
                         </WhiteBox>
                         <div>
                             <Title>{product.title}</Title>
+                            {renderAverageRating()} {/* Hiển thị sao trung bình ngay dưới tiêu đề */}
                             <p>{product.description}</p>
                             <PriceRow>
                                 <Price>{product.price.toLocaleString("vi-VN")} VND</Price>
@@ -111,7 +154,6 @@ export default function ProductPage({ product }) {
                             </PriceRow>
                         </div>
                     </ColWrapper>
-                    {/* Tích hợp Review component */}
                     <Review productId={product._id} />
                 </Center>
                 {showNotification && (
@@ -119,6 +161,7 @@ export default function ProductPage({ product }) {
                         Đã thêm vào giỏ hàng!
                     </Notification>
                 )}
+                {showModal && <LoginPromptModal onClose={() => setShowModal(false)} />}
             </PageWrapper>
         </>
     );
@@ -127,10 +170,24 @@ export default function ProductPage({ product }) {
 export async function getServerSideProps(context) {
     await mongooseConnect();
     const { id } = context.query;
+
+    // Lấy thông tin sản phẩm
     const product = await Product.findById(id);
+
+    // Lấy danh sách đánh giá của sản phẩm
+    const reviews = await ReviewModel.find({ product: id });
+
+    // Tính trung bình số sao
+    let averageRating = 0;
+    if (reviews.length > 0) {
+        const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
+        averageRating = totalRating / reviews.length;
+    }
+
     return {
         props: {
             product: JSON.parse(JSON.stringify(product)),
+            averageRating, // Truyền trung bình số sao vào props
         },
     };
 }

@@ -568,7 +568,7 @@ export default function Account() {
 
     const handleLogout = () => {
         logout();
-        router.push('/login');
+        router.push('/'); // Chuyển hướng đến trang chủ thay vì trang login
     };
 
     const handleChange = (e, formType) => {

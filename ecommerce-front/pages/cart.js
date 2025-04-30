@@ -180,10 +180,22 @@ export default function CartPage() {
     }
 
     let total = 0;
+    let totalShipping = 0; // Biến để lưu tổng phí vận chuyển
+
+    // Tính tổng giá sản phẩm và tổng phí vận chuyển
     for (const productId of cartProducts) {
-        const price = products.find((p) => p._id === productId)?.price || 0;
-        total += price;
+        const product = products.find((p) => p._id === productId);
+        if (product) {
+            const quantity = cartProducts.filter((id) => id === productId).length;
+            const productPrice = product.price || 0;
+            const shippingPrice = product.priceShip || 0; // Lấy phí vận chuyển từ dữ liệu API
+
+            total += productPrice * quantity; // Tổng giá sản phẩm
+            totalShipping += shippingPrice * quantity; // Tổng phí vận chuyển
+        }
     }
+
+    const grandTotal = total + totalShipping; // Tổng cộng (giá sản phẩm + phí vận chuyển)
 
     if (isSuccess) {
         return (
@@ -238,14 +250,29 @@ export default function CartPage() {
                                             <td>
                                                 {(cartProducts.filter((id) => id === product._id).length * product.price).toLocaleString(
                                                     "vi-VN"
+                                                )} VND
+                                                {product.priceShip > 0 && (
+                                                    <div>
+                                                        + {(product.priceShip * cartProducts.filter((id) => id === product._id).length).toLocaleString("vi-VN")} VND
+                                                    </div>
                                                 )}
                                             </td>
                                         </tr>
                                     ))}
                                     <tr>
                                         <td></td>
-                                        <td></td>
+                                        <td>Tổng giá sản phẩm:</td>
                                         <td>{total.toLocaleString("vi-VN")} VND</td>
+                                    </tr>
+                                    <tr>
+                                        <td></td>
+                                        <td>Tổng phí vận chuyển:</td>
+                                        <td>{totalShipping.toLocaleString("vi-VN")} VND</td>
+                                    </tr>
+                                    <tr>
+                                        <td></td>
+                                        <td>Tổng cộng:</td>
+                                        <td>{grandTotal.toLocaleString("vi-VN")} VND</td>
                                     </tr>
                                 </tbody>
                             </Table>

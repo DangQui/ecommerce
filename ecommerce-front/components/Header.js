@@ -276,7 +276,7 @@ export default function Header() {
                                 Giỏ hàng (<span id="cart-icon">{cartProducts.length}</span>)
                             </NavLink>
                             {isAuthenticated && (
-                                <NavLink href={'#'} onClick={handleLogout} active={false}>Đăng xuất</NavLink>
+                                <NavLink href={'/'} onClick={handleLogout} active={false}>Đăng xuất</NavLink>
                             )}
                         </StyledNav>
                         <SearchWrapper>

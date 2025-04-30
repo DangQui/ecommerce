@@ -64,9 +64,9 @@ const Button = styled.button`
     font-size: 14px;
     cursor: pointer;
     color: white;
-    background-color: ${props => props.primary ? '#ff5733' : '#ddd'};
+    background-color: ${props => props.primary ? '#11519d' : '#a0a0a0'};
     &:hover {
-        background-color: ${props => props.primary ? '#e64d2e' : '#ccc'};
+        background-color: ${props => props.primary ? '#0e68d0' : '#ccc'};
     }
 `;
 

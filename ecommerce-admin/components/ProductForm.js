@@ -7,12 +7,10 @@ import Spinner from "./Spinner";
 import { ReactSortable } from "react-sortablejs";
 import { useNotification } from "@/context/NotificationContext";
 
-// Hàm format số với dấu chấm (ví dụ: 1234567 -> 1.234.567)
 function formatNumberWithDots(number) {
   return number.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ".");
 }
 
-// Hàm loại bỏ dấu chấm để lấy giá trị số thực tế (ví dụ: 1.234.567 -> 1234567)
 function parseNumberWithDots(value) {
   return value.replace(/\./g, "");
 }
@@ -82,21 +80,33 @@ export default function ProductForm({
   async function upLoadImages(ev) {
     const files = ev.target?.files;
     if (files.length > 0) {
-      setIsUploading(true);
+      const validImageTypes = ["image/jpeg", "image/png", "image/gif", "image/webp"];
       const data = new FormData();
+      let hasInvalidFile = false;
+
       for (const file of files) {
-        data.append("file", file);
+        if (validImageTypes.includes(file.type)) {
+          data.append("file", file);
+        } else {
+          hasInvalidFile = true;
+        }
       }
-      try {
-        const res = await axios.post("/api/upload", data);
-        setImages((oldImages) => {
-          return [...oldImages, ...res.data.links];
-        });
-        showNotification("Tải ảnh lên thành công");
-      } catch (error) {
-        showNotification("Tải ảnh lên thất bại", "error");
-      } finally {
-        setIsUploading(false);
+
+      if (hasInvalidFile) {
+        showNotification("Chỉ được tải lên các tệp hình ảnh (jpg, png, gif, webp)", "error");
+      }
+
+      if (data.has("file")) {
+        setIsUploading(true);
+        try {
+          const res = await axios.post("/api/upload", data);
+          setImages((oldImages) => [...oldImages, ...res.data.links]);
+          showNotification("Tải ảnh lên thành công");
+        } catch (error) {
+          showNotification("Tải ảnh lên thất bại", "error");
+        } finally {
+          setIsUploading(false);
+        }
       }
     }
   }
