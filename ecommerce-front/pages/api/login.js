@@ -29,6 +29,13 @@ export default async function handler(req, res) {
             return res.status(400).json({ error: 'Email hoặc số điện thoại không tồn tại' });
         }
 
+        // Kiểm tra trạng thái vô hiệu hóa
+        if (user.isDisabled) {
+            return res.status(400).json({
+                error: 'Tài khoản của bạn đã bị vô hiệu hóa. Vui lòng liên hệ quản trị viên để được hỗ trợ.',
+            });
+        }
+
         if (!user.isVerified) {
             return res.status(400).json({ error: 'Tài khoản chưa được xác thực' });
         }
@@ -42,7 +49,7 @@ export default async function handler(req, res) {
             const verificationCode = Math.floor(100000 + Math.random() * 900000).toString();
 
             const mailOptions = {
-                from: `QuisK Shop <${process.env.EMAIL_USER}>`, // Thay đổi phần người gửi thành "QuisK Shop"
+                from: `QuisK Shop <${process.env.EMAIL_USER}>`,
                 to: user.email,
                 subject: 'Mã Xác Thực Đăng Nhập',
                 html: `

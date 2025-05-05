@@ -139,10 +139,12 @@ export default function SetPassword() {
 
     const validateForm = () => {
         const newErrors = {};
+        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%^&*])(?=.{8,})/;
+
         if (!formData.password) {
             newErrors.password = 'Yêu cầu không bỏ trống';
-        } else if (formData.password.length < 6) {
-            newErrors.password = 'Mật khẩu phải có ít nhất 6 ký tự';
+        } else if (!passwordRegex.test(formData.password)) {
+            newErrors.password = 'Mật khẩu phải có ít nhất 8 ký tự, bao gồm chữ thường, chữ hoa và ký tự đặc biệt';
         }
         if (!formData.confirmPassword) {
             newErrors.confirmPassword = 'Yêu cầu không bỏ trống';

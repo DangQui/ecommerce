@@ -77,11 +77,11 @@ const InputWrapper = styled.div`
 const Input = styled.input`
     width: 100%;
     padding: 10px;
-    padding-right: 40px; /* Dành chỗ cho icon */
+    padding-right: 40px;
     border: 1px solid ${props => props.error ? '#ff0000' : '#ddd'};
     border-radius: 5px;
     font-size: 14px;
-    box-sizing: border-box; /* Bao gồm padding và border trong chiều rộng */
+    box-sizing: border-box;
     &:focus {
         outline: none;
         border-color: ${props => props.error ? '#ff0000' : '#1a73e8'};

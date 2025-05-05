@@ -118,15 +118,15 @@ export default function AdminsPage() {
             <div className="overflow-x-auto">
                 <table className="w-full bg-white shadow-md rounded-lg text-center">
                     <thead className="bg-gray-100">
-                        <tr>
-                            <th className="p-3">EMAIL QUẢN TRỊ VIÊN</th>
-                            <th className="p-3">NGÀY TẠO</th>
-                            <th className="p-3">HÀNH ĐỘNG</th>
+                        <tr className="border-b border-[#ddd]">
+                            <th className="p-3 text-gray-600">EMAIL QUẢN TRỊ VIÊN</th>
+                            <th className="p-3 text-gray-600">NGÀY TẠO</th>
+                            <th className="p-3 text-gray-600">HÀNH ĐỘNG</th>
                         </tr>
                     </thead>
                     <tbody>
                         {admins.map((admin) => (
-                            <tr key={admin._id} className="border-t">
+                            <tr key={admin._id} className="border-b border-[#ddd]">
                                 <td className="p-3">{admin.email}</td>
                                 <td className="p-3">{new Date(admin.createdAt).toLocaleString()}</td>
                                 <td className="p-3">

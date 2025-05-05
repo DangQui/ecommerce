@@ -9,7 +9,7 @@ const CustomerUserSchema = new mongoose.Schema({
     isVerified: { type: Boolean, default: false },
     twoFactorEnabled: { type: Boolean, default: false },
     createdAt: { type: Date, default: Date.now },
-    isDisabled: { type: Boolean, default: false }, // Thêm trường isDisabled, mặc định là false (không bị vô hiệu hóa)
+    isDisabled: { type: Boolean, default: false },
 });
 
 const CustomerUser = mongoose.models.CustomerUser || mongoose.model('CustomerUser', CustomerUserSchema);

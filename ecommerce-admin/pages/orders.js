@@ -1,6 +1,12 @@
 import Layout from "@/components/Layout";
 import { useEffect, useState } from "react";
 import axios from "axios";
+import styled from "styled-components";
+
+
+const TR = styled.tr`
+    text-align: left;
+`;
 
 export default function OrdersPage() {
     const [orders, setOrders] = useState([]);
@@ -16,12 +22,12 @@ export default function OrdersPage() {
             <h1>Danh Sách Đơn Hàng</h1>
             <table className="basic">
                 <thead>
-                    <tr>
+                    <TR>
                         <th>Ngày</th>
                         <th>Thanh toán</th>
                         <th>Người nhận</th>
                         <th>Sản phẩm</th>
-                    </tr>
+                    </TR>
                 </thead>
                 <tbody>
                     {orders.length > 0 && orders.map(order => (
